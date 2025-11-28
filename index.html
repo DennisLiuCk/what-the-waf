@@ -4,19 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>What The WAF - WAF 學習平台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
-            --bg-code: #334155;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --border: #334155;
+            --phosphor: #00ff41;
+            --phosphor-dim: #00cc33;
+            --phosphor-glow: rgba(0, 255, 65, 0.15);
+            --amber: #ffb000;
+            --amber-dim: #cc8c00;
+            --amber-glow: rgba(255, 176, 0, 0.15);
+            --danger: #ff3333;
+            --danger-glow: rgba(255, 51, 51, 0.15);
+            --cyan: #00d4ff;
+            --cyan-dim: #00a8cc;
+            --obsidian: #0a0a0a;
+            --obsidian-light: #141414;
+            --surface: #1a1a1a;
+            --surface-elevated: #242424;
+            --text-primary: #e8e8e8;
+            --text-secondary: #888888;
+            --text-dim: #555555;
+            --border: #2a2a2a;
+            --border-glow: #333333;
         }
 
         * {
@@ -25,11 +36,63 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: var(--bg-dark);
+            font-family: 'Space Grotesk', system-ui, sans-serif;
+            background: var(--obsidian);
             color: var(--text-primary);
-            line-height: 1.6;
+            line-height: 1.7;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Atmospheric Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 65, 0.015) 2px,
+                    rgba(0, 255, 65, 0.015) 4px
+                ),
+                radial-gradient(ellipse at 50% 0%, rgba(0, 255, 65, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* CRT Scanline Effect */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0px,
+                transparent 1px,
+                rgba(0, 0, 0, 0.15) 1px,
+                rgba(0, 0, 0, 0.15) 2px
+            );
+            pointer-events: none;
+            z-index: 9999;
+            animation: scanlines 0.1s linear infinite;
+        }
+
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(2px); }
         }
 
         /* Navigation */
@@ -37,15 +100,26 @@
             position: fixed;
             top: 0;
             width: 100%;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(10, 10, 10, 0.92);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             z-index: 1000;
-            padding: 1rem 2rem;
+            padding: 0.875rem 2rem;
+        }
+
+        nav::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--phosphor-dim), transparent);
+            opacity: 0.5;
         }
 
         nav .container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -53,152 +127,309 @@
         }
 
         .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--phosphor);
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-shadow: 0 0 20px var(--phosphor-glow);
+        }
+
+        .logo::before {
+            content: '>';
+            color: var(--text-dim);
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
         }
 
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 0.25rem;
             list-style: none;
         }
 
         .nav-links a {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
             color: var(--text-secondary);
             text-decoration: none;
-            transition: color 0.3s;
+            padding: 0.5rem 0.875rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .nav-links a::before {
+            content: './';
+            color: var(--text-dim);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .nav-links a:hover::before {
+            opacity: 1;
         }
 
         .nav-links a:hover {
-            color: var(--primary);
+            color: var(--phosphor);
+            background: var(--phosphor-glow);
         }
 
         /* Hero Section */
         .hero {
-            padding: 8rem 2rem 4rem;
+            padding: 10rem 2rem 6rem;
             text-align: center;
-            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a2e 100%);
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--phosphor-glow) 0%, transparent 70%);
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .hero-ascii {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            line-height: 1.2;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
         }
 
         .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            letter-spacing: -0.03em;
+            position: relative;
+        }
+
+        .hero h1 .highlight {
+            color: var(--phosphor);
+            text-shadow: 0 0 30px var(--phosphor-glow), 0 0 60px var(--phosphor-glow);
+            position: relative;
         }
 
         .hero p {
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 2rem;
+            max-width: 560px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.8;
         }
 
         /* Container */
         .container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 2rem;
+            position: relative;
+            z-index: 1;
         }
 
         /* Section */
         section {
-            padding: 4rem 0;
+            padding: 5rem 0;
+            position: relative;
         }
 
         section h2 {
-            font-size: 2rem;
-            margin-bottom: 2rem;
-            color: var(--text-primary);
-            border-left: 4px solid var(--primary);
-            padding-left: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 2.5rem;
+            color: var(--phosphor);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        section h2::before {
+            content: '//';
+            color: var(--text-dim);
+        }
+
+        section h2::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border), transparent);
         }
 
         /* Cards */
         .card-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.25rem;
         }
 
         .card {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 1.5rem;
+            background: var(--surface);
+            padding: 1.75rem;
             border: 1px solid var(--border);
-            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--phosphor);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--phosphor-glow) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.2);
+            border-color: var(--phosphor-dim);
+            transform: translateX(4px);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover::after {
+            opacity: 1;
         }
 
         .card h3 {
-            color: var(--primary);
-            margin-bottom: 1rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.875rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.625rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card h3 .icon {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            color: var(--phosphor);
+            opacity: 0.7;
+            letter-spacing: 0.02em;
         }
 
         .card p {
             color: var(--text-secondary);
+            font-size: 0.9375rem;
+            position: relative;
+            z-index: 1;
         }
 
         /* Attack Types */
         .attack-badge {
+            font-family: 'JetBrains Mono', monospace;
             display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
+            padding: 0.25rem 0.625rem;
+            font-size: 0.6875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
             margin-bottom: 1rem;
+            border: 1px solid;
         }
 
         .badge-critical {
-            background: rgba(239, 68, 68, 0.2);
+            background: var(--danger-glow);
             color: var(--danger);
+            border-color: var(--danger);
         }
 
         .badge-high {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--warning);
+            background: var(--amber-glow);
+            color: var(--amber);
+            border-color: var(--amber);
         }
 
         .badge-medium {
-            background: rgba(99, 102, 241, 0.2);
-            color: var(--primary);
+            background: var(--phosphor-glow);
+            color: var(--phosphor);
+            border-color: var(--phosphor);
         }
 
         /* Code Block */
         .code-block {
-            background: var(--bg-code);
-            border-radius: 8px;
-            padding: 1rem;
+            background: var(--obsidian);
+            padding: 1.25rem;
             margin: 1rem 0;
             overflow-x: auto;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 0.875rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
             border: 1px solid var(--border);
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .code-block::before {
+            content: 'terminal';
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-size: 0.625rem;
+            color: var(--text-dim);
+            padding: 0.375rem 0.625rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-left: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
         }
 
         .code-block code {
-            color: #e2e8f0;
+            color: var(--text-primary);
         }
 
         .code-comment {
-            color: #6b7280;
+            color: var(--text-dim);
+            font-style: italic;
         }
 
         .code-keyword {
-            color: var(--primary);
+            color: var(--cyan);
         }
 
         .code-string {
-            color: var(--secondary);
+            color: var(--phosphor);
         }
 
         .code-danger {
@@ -207,8 +438,7 @@
 
         /* Interactive Quiz */
         .quiz-container {
-            background: var(--bg-card);
-            border-radius: 12px;
+            background: var(--surface);
             padding: 2rem;
             border: 1px solid var(--border);
         }
@@ -218,80 +448,149 @@
         }
 
         .quiz-question h4 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
             margin-bottom: 1rem;
-            color: var(--text-primary);
+            color: var(--amber);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
 
         .quiz-input {
             width: 100%;
             padding: 1rem;
-            background: var(--bg-code);
+            background: var(--obsidian);
             border: 1px solid var(--border);
-            border-radius: 8px;
             color: var(--text-primary);
-            font-family: monospace;
+            font-family: 'JetBrains Mono', monospace;
             margin-bottom: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .quiz-input:focus {
+            outline: none;
+            border-color: var(--phosphor-dim);
         }
 
         .quiz-options {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 0.625rem;
         }
 
         .quiz-option {
-            padding: 1rem;
-            background: var(--bg-code);
-            border: 2px solid var(--border);
-            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            background: var(--obsidian);
+            border: 1px solid var(--border);
             cursor: pointer;
-            transition: all 0.3s;
-            color: var(--text-primary);
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            position: relative;
+            padding-left: 2.5rem;
+        }
+
+        .quiz-option::before {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            border: 1px solid var(--text-dim);
+            background: transparent;
+            transition: all 0.2s;
         }
 
         .quiz-option:hover {
-            border-color: var(--primary);
+            border-color: var(--phosphor-dim);
+            color: var(--text-primary);
+        }
+
+        .quiz-option:hover::before {
+            border-color: var(--phosphor);
         }
 
         .quiz-option.correct {
-            border-color: var(--secondary);
-            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--phosphor);
+            background: var(--phosphor-glow);
+            color: var(--phosphor);
+        }
+
+        .quiz-option.correct::before {
+            background: var(--phosphor);
+            border-color: var(--phosphor);
+            box-shadow: 0 0 10px var(--phosphor-glow);
         }
 
         .quiz-option.incorrect {
             border-color: var(--danger);
-            background: rgba(239, 68, 68, 0.1);
+            background: var(--danger-glow);
+            color: var(--danger);
+        }
+
+        .quiz-option.incorrect::before {
+            background: var(--danger);
+            border-color: var(--danger);
         }
 
         .btn {
+            font-family: 'JetBrains Mono', monospace;
             padding: 0.75rem 1.5rem;
             border: none;
-            border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s;
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s ease;
         }
 
         .btn-primary {
-            background: var(--primary);
-            color: white;
+            background: var(--phosphor);
+            color: var(--obsidian);
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.4s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
         }
 
         .btn-primary:hover {
-            background: var(--primary-dark);
+            background: var(--phosphor-dim);
+            box-shadow: 0 0 20px var(--phosphor-glow);
         }
 
         .btn-secondary {
-            background: var(--bg-code);
-            color: var(--text-primary);
+            background: transparent;
+            color: var(--text-secondary);
             border: 1px solid var(--border);
         }
 
+        .btn-secondary:hover {
+            border-color: var(--phosphor-dim);
+            color: var(--phosphor);
+        }
+
         .result-box {
-            padding: 1rem;
-            border-radius: 8px;
+            padding: 1rem 1.25rem;
             margin-top: 1rem;
             display: none;
+            border: 1px solid;
+            font-size: 0.9375rem;
         }
 
         .result-box.show {
@@ -299,84 +598,145 @@
         }
 
         .result-success {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid var(--secondary);
-            color: var(--secondary);
+            background: var(--phosphor-glow);
+            border-color: var(--phosphor-dim);
+            color: var(--phosphor);
         }
 
         .result-error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid var(--danger);
+            background: var(--danger-glow);
+            border-color: var(--danger);
             color: var(--danger);
         }
 
         /* WAF Rule Demo */
         .rule-demo {
-            background: var(--bg-card);
-            border-radius: 12px;
+            background: var(--surface);
             padding: 2rem;
             margin-top: 1.5rem;
             border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .rule-demo::before {
+            content: 'WAF_SIMULATOR';
+            position: absolute;
+            top: -0.75rem;
+            left: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.625rem;
+            color: var(--amber);
+            background: var(--surface);
+            padding: 0.25rem 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            border: 1px solid var(--amber-dim);
+        }
+
+        .rule-demo h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
         }
 
         .rule-input-group {
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
             margin-bottom: 1rem;
         }
 
         .rule-input-group input {
             flex: 1;
-            padding: 0.75rem 1rem;
-            background: var(--bg-code);
+            padding: 0.875rem 1rem;
+            background: var(--obsidian);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-family: monospace;
+            color: var(--phosphor);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .rule-input-group input:focus {
+            outline: none;
+            border-color: var(--phosphor-dim);
+            box-shadow: 0 0 0 3px var(--phosphor-glow);
+        }
+
+        .rule-input-group input::placeholder {
+            color: var(--text-dim);
         }
 
         .detection-result {
-            padding: 1rem;
-            border-radius: 8px;
+            padding: 1rem 1.25rem;
             margin-top: 1rem;
+            border: 1px solid;
         }
 
         .detection-blocked {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid var(--danger);
+            background: var(--danger-glow);
+            border-color: var(--danger);
+            animation: blocked-pulse 0.5s ease;
+        }
+
+        @keyframes blocked-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
 
         .detection-allowed {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid var(--secondary);
+            background: var(--phosphor-glow);
+            border-color: var(--phosphor);
         }
 
         /* Tabs */
         .tabs {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.25rem;
             margin-bottom: 1.5rem;
             flex-wrap: wrap;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.75rem;
         }
 
         .tab {
-            padding: 0.75rem 1.5rem;
-            background: var(--bg-code);
-            border: 1px solid var(--border);
-            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 0.625rem 1rem;
+            background: transparent;
+            border: 1px solid transparent;
             cursor: pointer;
-            color: var(--text-secondary);
-            transition: all 0.3s;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .tab::after {
+            content: '';
+            position: absolute;
+            bottom: -0.8125rem;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--phosphor);
+            transform: scaleX(0);
+            transition: transform 0.2s;
         }
 
         .tab:hover {
-            color: var(--text-primary);
+            color: var(--text-secondary);
         }
 
         .tab.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
+            color: var(--phosphor);
+            background: var(--phosphor-glow);
+            border-color: var(--border);
+        }
+
+        .tab.active::after {
+            transform: scaleX(1);
         }
 
         .tab-content {
@@ -385,52 +745,64 @@
 
         .tab-content.active {
             display: block;
+            animation: tabFade 0.3s ease;
+        }
+
+        @keyframes tabFade {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Accordion */
         .accordion {
             border: 1px solid var(--border);
-            border-radius: 12px;
             overflow: hidden;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
 
         .accordion-header {
-            padding: 1rem 1.5rem;
-            background: var(--bg-card);
+            padding: 1rem 1.25rem;
+            background: var(--surface);
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: background 0.3s;
+            transition: all 0.2s;
         }
 
         .accordion-header:hover {
-            background: var(--bg-code);
+            background: var(--surface-elevated);
         }
 
         .accordion-header h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
             color: var(--text-primary);
+            font-size: 0.9375rem;
         }
 
         .accordion-icon {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-dim);
+            font-size: 0.75rem;
             transition: transform 0.3s;
         }
 
         .accordion.active .accordion-icon {
             transform: rotate(180deg);
+            color: var(--phosphor);
         }
 
         .accordion-content {
-            padding: 0 1.5rem;
+            padding: 0 1.25rem;
             max-height: 0;
             overflow: hidden;
-            transition: all 0.3s;
-            background: var(--bg-card);
+            transition: all 0.3s ease;
+            background: var(--obsidian-light);
         }
 
         .accordion.active .accordion-content {
-            padding: 1.5rem;
+            padding: 1.25rem;
             max-height: 2000px;
         }
 
@@ -440,42 +812,83 @@
         }
 
         .progress-bar {
-            height: 8px;
-            background: var(--bg-code);
-            border-radius: 4px;
+            height: 4px;
+            background: var(--border);
             overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 4px,
+                var(--obsidian) 4px,
+                var(--obsidian) 8px
+            );
+            z-index: 2;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 4px;
-            transition: width 0.5s;
+            background: var(--phosphor);
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px var(--phosphor-glow);
         }
 
         .progress-text {
             display: flex;
             justify-content: space-between;
-            margin-top: 0.5rem;
-            color: var(--text-secondary);
-            font-size: 0.875rem;
+            margin-top: 0.625rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
 
         /* Footer */
         footer {
-            background: var(--bg-card);
+            background: var(--obsidian);
             padding: 3rem 2rem;
             text-align: center;
             border-top: 1px solid var(--border);
+            position: relative;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--phosphor-dim), transparent);
+            opacity: 0.3;
         }
 
         footer p {
-            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
         }
 
         footer a {
-            color: var(--primary);
+            color: var(--phosphor);
             text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: var(--phosphor-dim);
+            text-decoration: underline;
         }
 
         /* Responsive */
@@ -488,8 +901,16 @@
                 font-size: 2.5rem;
             }
 
+            .hero-ascii {
+                display: none;
+            }
+
             .rule-input-group {
                 flex-direction: column;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -499,27 +920,57 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
         .animate-in {
-            animation: fadeIn 0.5s ease forwards;
+            animation: fadeIn 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        .glitch-text:hover {
+            animation: glitch 0.3s ease;
         }
 
         /* Scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
         }
 
         ::-webkit-scrollbar-track {
-            background: var(--bg-dark);
+            background: var(--obsidian);
         }
 
         ::-webkit-scrollbar-thumb {
             background: var(--border);
-            border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary);
+            background: var(--phosphor-dim);
+        }
+
+        /* Selection */
+        ::selection {
+            background: var(--phosphor);
+            color: var(--obsidian);
+        }
+
+        /* Focus visible */
+        :focus-visible {
+            outline: 2px solid var(--phosphor);
+            outline-offset: 2px;
         }
     </style>
 </head>
@@ -527,39 +978,49 @@
     <!-- Navigation -->
     <nav>
         <div class="container">
-            <div class="logo">🛡️ What The WAF</div>
+            <div class="logo">what_the_waf</div>
             <ul class="nav-links">
-                <li><a href="#intro">介紹</a></li>
-                <li><a href="#attacks">攻擊類型</a></li>
-                <li><a href="#rules">WAF 規則</a></li>
-                <li><a href="#bypass">繞過技術</a></li>
-                <li><a href="#quiz">實戰練習</a></li>
+                <li><a href="#intro">intro</a></li>
+                <li><a href="#attacks">attacks</a></li>
+                <li><a href="#rules">rules</a></li>
+                <li><a href="#bypass">bypass</a></li>
+                <li><a href="#quiz">quiz</a></li>
             </ul>
         </div>
     </nav>
 
     <!-- Hero Section -->
     <section class="hero">
-        <h1>What The WAF</h1>
+        <pre class="hero-ascii">
+    ╔═══════════════════════════════════════════════════════════╗
+    ║  ██╗    ██╗ █████╗ ███████╗    ██████╗ ███████╗███████╗  ║
+    ║  ██║    ██║██╔══██╗██╔════╝    ██╔══██╗██╔════╝██╔════╝  ║
+    ║  ██║ █╗ ██║███████║█████╗      ██║  ██║█████╗  █████╗    ║
+    ║  ██║███╗██║██╔══██║██╔══╝      ██║  ██║██╔══╝  ██╔══╝    ║
+    ║  ╚███╔███╔╝██║  ██║██║         ██████╔╝███████╗██║       ║
+    ║   ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝         ╚═════╝ ╚══════╝╚═╝       ║
+    ╚═══════════════════════════════════════════════════════════╝
+        </pre>
+        <h1>What The <span class="highlight glitch-text">WAF</span></h1>
         <p>深入了解 Web Application Firewall 的運作原理，學習如何保護您的網站應用程式免受常見攻擊</p>
-        <a href="#intro" class="btn btn-primary">開始學習</a>
+        <a href="#intro" class="btn btn-primary">$ ./start_learning</a>
     </section>
 
     <div class="container">
         <!-- Introduction Section -->
         <section id="intro">
-            <h2>什麼是 WAF？</h2>
+            <h2>什麼是 WAF</h2>
             <div class="card-grid">
                 <div class="card">
-                    <h3>📋 定義</h3>
+                    <h3><span class="icon">[DEF]</span> 定義</h3>
                     <p>Web Application Firewall (WAF) 是一種應用層防火牆，專門用於監控、過濾和阻止進出 Web 應用程式的 HTTP/HTTPS 流量。</p>
                 </div>
                 <div class="card">
-                    <h3>🎯 目的</h3>
+                    <h3><span class="icon">[OBJ]</span> 目的</h3>
                     <p>WAF 主要目的是保護 Web 應用程式免受常見的攻擊，如 SQL Injection、XSS、CSRF 等 OWASP Top 10 威脅。</p>
                 </div>
                 <div class="card">
-                    <h3>⚙️ 運作方式</h3>
+                    <h3><span class="icon">[HOW]</span> 運作方式</h3>
                     <p>WAF 透過預定義的規則集或機器學習模型來分析 HTTP 請求，識別並阻止惡意流量。</p>
                 </div>
             </div>
@@ -600,8 +1061,8 @@
             <!-- SQL Injection -->
             <div class="tab-content active" id="sqli">
                 <div class="card">
-                    <span class="attack-badge badge-critical">嚴重</span>
-                    <h3>💉 SQL Injection (SQL 注入)</h3>
+                    <span class="attack-badge badge-critical">CRITICAL</span>
+                    <h3><span class="icon">[SQLi]</span> SQL Injection (SQL 注入)</h3>
                     <p>攻擊者透過在輸入欄位中注入惡意 SQL 程式碼，來操控後端資料庫。</p>
 
                     <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">攻擊範例：</h4>
@@ -638,8 +1099,8 @@ SecRule ARGS <span class="code-string">"(?i)(union.*select|select.*from|insert.*
             <!-- XSS -->
             <div class="tab-content" id="xss">
                 <div class="card">
-                    <span class="attack-badge badge-high">高風險</span>
-                    <h3>🔓 Cross-Site Scripting (XSS)</h3>
+                    <span class="attack-badge badge-high">HIGH</span>
+                    <h3><span class="icon">[XSS]</span> Cross-Site Scripting (XSS)</h3>
                     <p>攻擊者將惡意腳本注入到網頁中，當其他用戶瀏覽該頁面時執行。</p>
 
                     <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">攻擊範例：</h4>
@@ -675,8 +1136,8 @@ SecRule ARGS <span class="code-string">"(?i)(&lt;script|javascript:|on\w+\s*=)"<
             <!-- Command Injection -->
             <div class="tab-content" id="rce">
                 <div class="card">
-                    <span class="attack-badge badge-critical">嚴重</span>
-                    <h3>💻 Command Injection (命令注入)</h3>
+                    <span class="attack-badge badge-critical">CRITICAL</span>
+                    <h3><span class="icon">[RCE]</span> Command Injection (命令注入)</h3>
                     <p>攻擊者透過注入系統命令，在伺服器上執行任意程式碼。</p>
 
                     <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">攻擊範例：</h4>
@@ -710,8 +1171,8 @@ SecRule ARGS <span class="code-string">"(?i)(;|\||&&|\$\(|`).*(cat|ls|whoami|id|
             <!-- Path Traversal -->
             <div class="tab-content" id="path">
                 <div class="card">
-                    <span class="attack-badge badge-high">高風險</span>
-                    <h3>📁 Path Traversal (路徑穿越)</h3>
+                    <span class="attack-badge badge-high">HIGH</span>
+                    <h3><span class="icon">[LFI]</span> Path Traversal (路徑穿越)</h3>
                     <p>攻擊者透過操作檔案路徑來存取伺服器上未授權的檔案。</p>
 
                     <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">攻擊範例：</h4>
@@ -738,8 +1199,8 @@ SecRule ARGS <span class="code-string">"(?i)(;|\||&&|\$\(|`).*(cat|ls|whoami|id|
             <!-- SSRF -->
             <div class="tab-content" id="ssrf">
                 <div class="card">
-                    <span class="attack-badge badge-high">高風險</span>
-                    <h3>🌐 Server-Side Request Forgery (SSRF)</h3>
+                    <span class="attack-badge badge-high">HIGH</span>
+                    <h3><span class="icon">[SSRF]</span> Server-Side Request Forgery (SSRF)</h3>
                     <p>攻擊者誘導伺服器向內部網路或其他服務發送請求。</p>
 
                     <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">攻擊範例：</h4>
@@ -850,7 +1311,7 @@ REQUEST-942-APPLICATION-ATTACK-SQLI <span class="code-comment"># SQL 注入</spa
 
             <!-- Interactive WAF Demo -->
             <div class="rule-demo">
-                <h3 style="margin-bottom: 1rem;">🔍 WAF 即時偵測模擬器</h3>
+                <h3 style="margin-bottom: 1rem;">WAF 即時偵測模擬器</h3>
                 <p style="color: var(--text-secondary); margin-bottom: 1rem;">輸入一段 payload 來測試 WAF 是否會偵測到攻擊：</p>
 
                 <div class="rule-input-group">
@@ -880,7 +1341,7 @@ REQUEST-942-APPLICATION-ATTACK-SQLI <span class="code-comment"># SQL 注入</spa
 
             <div class="card-grid">
                 <div class="card">
-                    <h3>🔤 大小寫變換</h3>
+                    <h3><span class="icon">[01]</span> 大小寫變換</h3>
                     <div class="code-block">
                         <code>
 <span class="code-comment"># 原始</span>
@@ -897,7 +1358,7 @@ UNION SELECT
                 </div>
 
                 <div class="card">
-                    <h3>📝 編碼繞過</h3>
+                    <h3><span class="icon">[02]</span> 編碼繞過</h3>
                     <div class="code-block">
                         <code>
 <span class="code-comment"># URL 編碼</span>
@@ -916,7 +1377,7 @@ UNION SELECT
                 </div>
 
                 <div class="card">
-                    <h3>💭 註解插入</h3>
+                    <h3><span class="icon">[03]</span> 註解插入</h3>
                     <div class="code-block">
                         <code>
 <span class="code-comment"># SQL 註解</span>
@@ -933,7 +1394,7 @@ UNION SELECT
                 </div>
 
                 <div class="card">
-                    <h3>⬜ 空白字符變換</h3>
+                    <h3><span class="icon">[04]</span> 空白字符變換</h3>
                     <div class="code-block">
                         <code>
 <span class="code-comment"># Tab 代替空格</span>
@@ -952,7 +1413,7 @@ UNION SELECT
                 </div>
 
                 <div class="card">
-                    <h3>🔄 同義詞替換</h3>
+                    <h3><span class="icon">[05]</span> 同義詞替換</h3>
                     <div class="code-block">
                         <code>
 <span class="code-comment"># OR 的替代</span>
@@ -971,7 +1432,7 @@ UNION SELECT
                 </div>
 
                 <div class="card">
-                    <h3>📦 參數污染</h3>
+                    <h3><span class="icon">[06]</span> 參數污染</h3>
                     <div class="code-block">
                         <code>
 <span class="code-comment"># HPP (HTTP Parameter Pollution)</span>
@@ -1021,27 +1482,27 @@ Tomcat: 取第一個
 
             <div class="card-grid">
                 <div class="card">
-                    <h3>✅ 分層防禦</h3>
+                    <h3><span class="icon">[LAYER]</span> 分層防禦</h3>
                     <p>WAF 只是防線之一，應結合輸入驗證、參數化查詢、CSP 等多層防護。</p>
                 </div>
                 <div class="card">
-                    <h3>📊 監控與日誌</h3>
+                    <h3><span class="icon">[LOG]</span> 監控與日誌</h3>
                     <p>持續監控 WAF 日誌，分析攻擊模式，並調整規則以減少誤報。</p>
                 </div>
                 <div class="card">
-                    <h3>🔄 定期更新</h3>
+                    <h3><span class="icon">[SYNC]</span> 定期更新</h3>
                     <p>保持 WAF 規則集更新，以應對新型攻擊技術。</p>
                 </div>
                 <div class="card">
-                    <h3>🧪 測試驗證</h3>
+                    <h3><span class="icon">[TEST]</span> 測試驗證</h3>
                     <p>在部署前進行充分測試，確保規則不會影響正常業務流量。</p>
                 </div>
                 <div class="card">
-                    <h3>⚖️ 平衡安全與可用性</h3>
+                    <h3><span class="icon">[CONF]</span> 平衡安全與可用性</h3>
                     <p>規則過於嚴格會導致誤報，過於寬鬆則無法有效防護，需找到平衡點。</p>
                 </div>
                 <div class="card">
-                    <h3>🎯 自訂規則</h3>
+                    <h3><span class="icon">[RULE]</span> 自訂規則</h3>
                     <p>根據應用程式特性，自訂專屬規則以提供更精準的保護。</p>
                 </div>
             </div>
@@ -1051,12 +1512,12 @@ Tomcat: 取第一個
         <section id="resources">
             <h2>延伸資源</h2>
             <div class="card">
-                <h3>📚 推薦學習資源</h3>
-                <ul style="color: var(--text-secondary); margin-top: 1rem; padding-left: 1.5rem;">
-                    <li style="margin-bottom: 0.5rem;"><a href="https://owasp.org/www-project-web-security-testing-guide/" target="_blank" style="color: var(--primary);">OWASP Web Security Testing Guide</a></li>
-                    <li style="margin-bottom: 0.5rem;"><a href="https://owasp.org/www-project-modsecurity-core-rule-set/" target="_blank" style="color: var(--primary);">OWASP ModSecurity Core Rule Set</a></li>
-                    <li style="margin-bottom: 0.5rem;"><a href="https://portswigger.net/web-security" target="_blank" style="color: var(--primary);">PortSwigger Web Security Academy</a></li>
-                    <li style="margin-bottom: 0.5rem;"><a href="https://github.com/payloadbox" target="_blank" style="color: var(--primary);">PayloadBox - Payload 收集</a></li>
+                <h3><span class="icon">[REF]</span> 推薦學習資源</h3>
+                <ul style="color: var(--text-secondary); margin-top: 1rem; padding-left: 1.5rem; list-style: none;">
+                    <li style="margin-bottom: 0.75rem;"><span style="color: var(--text-dim); margin-right: 0.5rem;">-></span><a href="https://owasp.org/www-project-web-security-testing-guide/" target="_blank" style="color: var(--phosphor);">OWASP Web Security Testing Guide</a></li>
+                    <li style="margin-bottom: 0.75rem;"><span style="color: var(--text-dim); margin-right: 0.5rem;">-></span><a href="https://owasp.org/www-project-modsecurity-core-rule-set/" target="_blank" style="color: var(--phosphor);">OWASP ModSecurity Core Rule Set</a></li>
+                    <li style="margin-bottom: 0.75rem;"><span style="color: var(--text-dim); margin-right: 0.5rem;">-></span><a href="https://portswigger.net/web-security" target="_blank" style="color: var(--phosphor);">PortSwigger Web Security Academy</a></li>
+                    <li style="margin-bottom: 0.75rem;"><span style="color: var(--text-dim); margin-right: 0.5rem;">-></span><a href="https://github.com/payloadbox" target="_blank" style="color: var(--phosphor);">PayloadBox - Payload 收集</a></li>
                 </ul>
             </div>
         </section>
@@ -1125,18 +1586,18 @@ Tomcat: 取第一個
             if (detections.length > 0) {
                 resultDiv.innerHTML = `
                     <div class="detection-result detection-blocked">
-                        <strong style="color: var(--danger);">🚫 請求被阻擋</strong>
-                        <p style="margin-top: 0.5rem; color: var(--text-secondary);">偵測到以下威脅：</p>
-                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
-                            ${detections.map(d => `<li style="color: var(--danger);">${d.type}: ${d.desc}</li>`).join('')}
+                        <strong style="color: var(--danger); font-family: 'JetBrains Mono', monospace; font-size: 0.875rem;">[BLOCKED] 請求被阻擋</strong>
+                        <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">偵測到以下威脅：</p>
+                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem; list-style: none;">
+                            ${detections.map(d => `<li style="color: var(--danger); font-family: 'JetBrains Mono', monospace; font-size: 0.8125rem; margin-bottom: 0.25rem;"><span style="color: var(--text-dim);">></span> ${d.type}: ${d.desc}</li>`).join('')}
                         </ul>
                     </div>
                 `;
             } else {
                 resultDiv.innerHTML = `
                     <div class="detection-result detection-allowed">
-                        <strong style="color: var(--secondary);">✅ 請求通過</strong>
-                        <p style="margin-top: 0.5rem; color: var(--text-secondary);">未偵測到已知攻擊模式</p>
+                        <strong style="color: var(--phosphor); font-family: 'JetBrains Mono', monospace; font-size: 0.875rem;">[ALLOWED] 請求通過</strong>
+                        <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">未偵測到已知攻擊模式</p>
                     </div>
                 `;
             }
@@ -1234,7 +1695,7 @@ Tomcat: 取第一個
             if (answers[currentQuestion] !== null) {
                 explanationHtml = `
                     <div class="result-box show ${answers[currentQuestion] === question.correct ? 'result-success' : 'result-error'}">
-                        ${answers[currentQuestion] === question.correct ? '✅ 正確！' : '❌ 錯誤！'}
+                        <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">${answers[currentQuestion] === question.correct ? '[CORRECT]' : '[INCORRECT]'}</span>
                         ${question.explanation}
                     </div>
                 `;
@@ -1299,24 +1760,28 @@ Tomcat: 取第一個
             const percentage = Math.round((correct / total) * 100);
 
             let message = '';
+            let statusClass = '';
             if (percentage >= 80) {
-                message = '🎉 太棒了！你對 WAF 有很好的理解！';
+                message = '你對 WAF 有很好的理解！';
+                statusClass = 'color: var(--phosphor);';
             } else if (percentage >= 60) {
-                message = '👍 不錯！繼續學習可以更上一層樓！';
+                message = '不錯！繼續學習可以更上一層樓！';
+                statusClass = 'color: var(--amber);';
             } else {
-                message = '📚 建議再複習一下上面的內容！';
+                message = '建議再複習一下上面的內容！';
+                statusClass = 'color: var(--danger);';
             }
 
             document.getElementById('quiz-content').innerHTML = `
                 <div style="text-align: center; padding: 2rem;">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">測驗完成！</h3>
-                    <p style="font-size: 3rem; margin-bottom: 1rem;">${percentage}%</p>
-                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">
-                        你答對了 ${correct} / ${total} 題
+                    <h3 style="font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; color: var(--text-dim); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.1em;">// QUIZ_COMPLETE</h3>
+                    <p style="font-family: 'JetBrains Mono', monospace; font-size: 4rem; margin-bottom: 1rem; ${statusClass}">${percentage}%</p>
+                    <p style="font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.875rem;">
+                        正確: ${correct} / ${total}
                     </p>
-                    <p style="font-size: 1.1rem;">${message}</p>
+                    <p style="font-size: 1rem; color: var(--text-primary);">${message}</p>
                     <button class="btn btn-primary" onclick="resetQuiz()" style="margin-top: 1.5rem;">
-                        重新測驗
+                        $ ./retry
                     </button>
                 </div>
             `;
