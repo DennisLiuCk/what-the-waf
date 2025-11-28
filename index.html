@@ -986,6 +986,7 @@
                 <li><a href="#attacks">attacks</a></li>
                 <li><a href="#rules">rules</a></li>
                 <li><a href="#bypass">bypass</a></li>
+                <li><a href="#log-analysis">logs</a></li>
                 <li><a href="#quiz">quiz</a></li>
             </ul>
         </div>
@@ -1453,6 +1454,350 @@ Tomcat: 取第一個
             </div>
         </section>
 
+        <!-- WAF Log Analysis Section -->
+        <section id="log-analysis">
+            <h2>WAF 日誌分析實戰</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">學習如何閱讀與分析真實的 WAF 阻擋日誌，理解結構與關鍵資訊，快速定位問題根因。</p>
+
+            <!-- Log Structure Overview -->
+            <div class="accordion active">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h4>WAF 日誌結構概覽</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content" style="max-height: 2000px; padding: 1.25rem;">
+                    <p style="margin-bottom: 1rem;">WAF 日誌通常包含以下核心欄位，理解這些欄位有助於快速分析問題：</p>
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 核心識別資訊</span>
+<span class="code-keyword">id</span>                  <span class="code-comment"># 日誌唯一識別碼</span>
+<span class="code-keyword">requestDatetime</span>     <span class="code-comment"># 請求時間 (UTC)</span>
+
+<span class="code-comment"># 請求基本資訊</span>
+<span class="code-keyword">method</span>              <span class="code-comment"># HTTP 方法 (GET/POST/PUT/DELETE)</span>
+<span class="code-keyword">url</span>                 <span class="code-comment"># 請求路徑 (通常 Base64 編碼)</span>
+<span class="code-keyword">host</span>                <span class="code-comment"># 目標主機</span>
+<span class="code-keyword">clientIp</span>            <span class="code-comment"># 來源 IP</span>
+<span class="code-keyword">clientPort</span>          <span class="code-comment"># 來源埠號</span>
+
+<span class="code-comment"># 執行狀態</span>
+<span class="code-keyword">requestStatus</span>       <span class="code-comment"># 請求狀態 (blocked/passed)</span>
+<span class="code-keyword">enforcementAction</span>   <span class="code-comment"># 執行動作 (block/allow/alarm)</span>
+<span class="code-keyword">responseCode</span>        <span class="code-comment"># HTTP 回應碼</span>
+
+<span class="code-comment"># 違規詳情</span>
+<span class="code-keyword">violations[]</span>        <span class="code-comment"># 違規項目陣列</span>
+<span class="code-keyword">enforcementState</span>    <span class="code-comment"># 整體執行狀態與威脅等級</span>
+<span class="code-keyword">attackType[]</span>        <span class="code-comment"># 偵測到的攻擊類型</span>
+
+<span class="code-comment"># 原始請求</span>
+<span class="code-keyword">rawRequest</span>          <span class="code-comment"># Base64 編碼的原始 HTTP 請求</span>
+<span class="code-keyword">requestPolicy</span>       <span class="code-comment"># 套用的安全策略名稱</span>
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h4>常見違規類型說明</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 威脅評分相關</span>
+<span class="code-danger">VIOL_RATING_THREAT</span>    <span class="code-comment"># 威脅評分超過閾值</span>
+
+<span class="code-comment"># 客戶端行為</span>
+<span class="code-danger">VIOL_BOT_CLIENT</span>       <span class="code-comment"># 偵測到 Bot/自動化工具</span>
+
+<span class="code-comment"># HTTP 協議相關</span>
+<span class="code-danger">VIOL_HTTP_RESPONSE_STATUS</span>  <span class="code-comment"># 異常 HTTP 回應狀態</span>
+
+<span class="code-comment"># 資料格式相關</span>
+<span class="code-danger">VIOL_JSON_MALFORMED</span>   <span class="code-comment"># JSON 格式錯誤/攻擊</span>
+<span class="code-danger">VIOL_XML_MALFORMED</span>    <span class="code-comment"># XML 格式錯誤/攻擊</span>
+
+<span class="code-comment"># 內容檢查</span>
+<span class="code-danger">VIOL_PARAMETER</span>        <span class="code-comment"># 參數違規</span>
+<span class="code-danger">VIOL_ATTACK_SIGNATURE</span> <span class="code-comment"># 匹配攻擊特徵</span>
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h4>攻擊類型 (attackType) 說明</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 客戶端識別</span>
+<span class="code-string">"Non-browser Client"</span>      <span class="code-comment"># 非瀏覽器用戶端 (如程式 API 呼叫)</span>
+
+<span class="code-comment"># 資訊洩漏</span>
+<span class="code-string">"Information Leakage"</span>     <span class="code-comment"># 可能洩漏敏感資訊</span>
+
+<span class="code-comment"># 應用程式活動</span>
+<span class="code-string">"Other Application Activity"</span>  <span class="code-comment"># 其他應用程式異常活動</span>
+<span class="code-string">"Abuse of Functionality"</span>  <span class="code-comment"># 功能濫用</span>
+
+<span class="code-comment"># 解析器攻擊</span>
+<span class="code-string">"JSON Parser Attack"</span>      <span class="code-comment"># JSON 解析器攻擊</span>
+<span class="code-string">"XML Parser Attack"</span>       <span class="code-comment"># XML 解析器攻擊</span>
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Case Studies -->
+            <h3 style="margin-top: 3rem; margin-bottom: 1.5rem; font-family: 'JetBrains Mono', monospace; color: var(--amber); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.1em;">案例分析</h3>
+
+            <!-- Case 1: Non-browser API Client -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <span class="attack-badge badge-high">CASE 1</span>
+                <h3><span class="icon">[API]</span> 非瀏覽器客戶端 API 請求被阻擋</h3>
+                <p style="margin-bottom: 1rem;">常見情境：後端服務間 API 呼叫被誤判為威脅</p>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">脫敏後的日誌範例：</h4>
+                <div class="code-block" style="font-size: 0.75rem;">
+                    <code>{
+  <span class="code-keyword">"id"</span>: <span class="code-string">"2360740580025XXXXXX"</span>,
+  <span class="code-keyword">"requestDatetime"</span>: <span class="code-string">"2025-11-27T11:52:09Z"</span>,
+  <span class="code-keyword">"method"</span>: <span class="code-string">"GET"</span>,
+  <span class="code-keyword">"url"</span>: <span class="code-string">"L29hcGkvYXBpL3Byb2R1Y3Qv..."</span>,  <span class="code-comment">// Base64: /oapi/api/product/...</span>
+  <span class="code-keyword">"clientIp"</span>: <span class="code-string">"xxx.xxx.xxx.xxx"</span>,
+  <span class="code-keyword">"requestStatus"</span>: <span class="code-danger">"blocked"</span>,
+  <span class="code-keyword">"enforcementAction"</span>: <span class="code-danger">"block"</span>,
+  <span class="code-keyword">"responseCode"</span>: <span class="code-danger">429</span>,
+  <span class="code-keyword">"violations"</span>: [
+    { <span class="code-keyword">"violation"</span>: { <span class="code-keyword">"name"</span>: <span class="code-string">"VIOL_HTTP_RESPONSE_STATUS"</span> }, <span class="code-keyword">"isBlocked"</span>: false },
+    { <span class="code-keyword">"violation"</span>: { <span class="code-keyword">"name"</span>: <span class="code-danger">"VIOL_RATING_THREAT"</span> }, <span class="code-keyword">"isBlocked"</span>: <span class="code-danger">true</span> },
+    { <span class="code-keyword">"violation"</span>: { <span class="code-keyword">"name"</span>: <span class="code-string">"VIOL_BOT_CLIENT"</span> }, <span class="code-keyword">"isBlocked"</span>: false }
+  ],
+  <span class="code-keyword">"enforcementState"</span>: {
+    <span class="code-keyword">"isBlocked"</span>: <span class="code-danger">true</span>,
+    <span class="code-keyword">"rating"</span>: <span class="code-danger">4</span>,
+    <span class="code-keyword">"attackType"</span>: [
+      { <span class="code-keyword">"name"</span>: <span class="code-string">"Non-browser Client"</span> },
+      { <span class="code-keyword">"name"</span>: <span class="code-string">"Information Leakage"</span> },
+      { <span class="code-keyword">"name"</span>: <span class="code-string">"Other Application Activity"</span> }
+    ]
+  },
+  <span class="code-keyword">"rawRequest"</span>: {
+    <span class="code-keyword">"httpRequest"</span>: <span class="code-string">"R0VUIC9vYXBpLy4uLg=="</span>  <span class="code-comment">// Base64 編碼的原始請求</span>
+  }
+}</code>
+                </div>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--cyan); font-size: 0.875rem;">解碼 rawRequest 分析：</h4>
+                <div class="code-block" style="font-size: 0.75rem;">
+                    <code><span class="code-comment"># 解碼後的 HTTP 請求 (已脫敏)</span>
+GET /oapi/api/product/xxx/product/details? HTTP/1.1
+Host: merchant-oapi.example.com
+<span class="code-danger">User-Agent: Go-http-client/1.1</span>  <span class="code-comment"># ← 關鍵! 非瀏覽器 UA</span>
+Content-Type: application/json
+X-Auth-Token: eyJhbGciOi...  <span class="code-comment"># JWT Token (已遮蔽)</span>
+Accept-Encoding: gzip
+
+[{"skuCode":"P00XXXXX_S_IP919XXXX"}...]  <span class="code-comment"># 請求 Body</span></code>
+                </div>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--phosphor); font-size: 0.875rem;">分析重點：</h4>
+                <ul style="color: var(--text-secondary); margin-top: 0.5rem; padding-left: 1.5rem;">
+                    <li style="margin-bottom: 0.5rem;"><strong>阻擋原因</strong>：<code style="color: var(--danger);">VIOL_RATING_THREAT</code> 是實際造成阻擋的違規</li>
+                    <li style="margin-bottom: 0.5rem;"><strong>User-Agent</strong>：<code style="color: var(--amber);">Go-http-client/1.1</code> 觸發了 "Non-browser Client" 偵測</li>
+                    <li style="margin-bottom: 0.5rem;"><strong>rating: 4</strong>：威脅評分達到閾值 (通常 4-5 會被阻擋)</li>
+                    <li style="margin-bottom: 0.5rem;"><strong>responseCode: 429</strong>：後端回傳 Too Many Requests，加重了威脅評分</li>
+                </ul>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--amber); font-size: 0.875rem;">解決建議：</h4>
+                <ul style="color: var(--text-secondary); margin-top: 0.5rem; padding-left: 1.5rem;">
+                    <li style="margin-bottom: 0.5rem;">將合法 API 客戶端 IP 加入 WAF 白名單</li>
+                    <li style="margin-bottom: 0.5rem;">為內部服務設定自訂 User-Agent 並加入例外</li>
+                    <li style="margin-bottom: 0.5rem;">調整威脅評分閾值或特定 API 路徑的敏感度</li>
+                </ul>
+            </div>
+
+            <!-- Case 2: Python Requests Client -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <span class="attack-badge badge-high">CASE 2</span>
+                <h3><span class="icon">[BOT]</span> Python 自動化腳本被識別為 Bot</h3>
+                <p style="margin-bottom: 1rem;">常見情境：自動化測試或批次處理腳本被阻擋</p>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">脫敏後的日誌範例：</h4>
+                <div class="code-block" style="font-size: 0.75rem;">
+                    <code>{
+  <span class="code-keyword">"id"</span>: <span class="code-string">"1759108076183XXXXXX"</span>,
+  <span class="code-keyword">"method"</span>: <span class="code-string">"POST"</span>,
+  <span class="code-keyword">"url"</span>: <span class="code-string">"L29hcGkvYXBpL29yZGVyL..."</span>,  <span class="code-comment">// Base64: /oapi/api/order/updateOrderStatus</span>
+  <span class="code-keyword">"requestStatus"</span>: <span class="code-danger">"blocked"</span>,
+  <span class="code-keyword">"responseCode"</span>: <span class="code-danger">500</span>,
+  <span class="code-keyword">"violations"</span>: [
+    { <span class="code-keyword">"violation"</span>: { <span class="code-keyword">"name"</span>: <span class="code-string">"VIOL_HTTP_RESPONSE_STATUS"</span> }, <span class="code-keyword">"isBlocked"</span>: false },
+    { <span class="code-keyword">"violation"</span>: { <span class="code-keyword">"name"</span>: <span class="code-danger">"VIOL_RATING_THREAT"</span> }, <span class="code-keyword">"isBlocked"</span>: <span class="code-danger">true</span> },
+    { <span class="code-keyword">"violation"</span>: { <span class="code-keyword">"name"</span>: <span class="code-string">"VIOL_BOT_CLIENT"</span> }, <span class="code-keyword">"isBlocked"</span>: false }
+  ],
+  <span class="code-keyword">"enforcementState"</span>: {
+    <span class="code-keyword">"rating"</span>: <span class="code-danger">4</span>,
+    <span class="code-keyword">"attackType"</span>: [
+      { <span class="code-keyword">"name"</span>: <span class="code-string">"Non-browser Client"</span> },
+      { <span class="code-keyword">"name"</span>: <span class="code-string">"Information Leakage"</span> }
+    ]
+  }
+}</code>
+                </div>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--cyan); font-size: 0.875rem;">解碼 rawRequest 分析：</h4>
+                <div class="code-block" style="font-size: 0.75rem;">
+                    <code><span class="code-comment"># 解碼後的 HTTP 請求 (已脫敏)</span>
+POST /oapi/api/order/updateOrderStatus HTTP/1.1
+Host: merchant-oapi.example.com
+<span class="code-danger">User-Agent: python-requests/2.25.1</span>  <span class="code-comment"># ← 關鍵! Python 庫預設 UA</span>
+Accept-Encoding: gzip, deflate
+Accept: */*
+Connection: keep-alive
+Content-Type: application/json
+x-auth-token: eyJhbGciOi...
+
+[{"orderNumber": "H251126XXXXX-HXXXXXX", "status": "PICKED", "trackingId": "XXXXXXXXXX"}]</code>
+                </div>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--phosphor); font-size: 0.875rem;">分析重點：</h4>
+                <ul style="color: var(--text-secondary); margin-top: 0.5rem; padding-left: 1.5rem;">
+                    <li style="margin-bottom: 0.5rem;"><strong>User-Agent</strong>：<code style="color: var(--danger);">python-requests/2.25.1</code> 是 Python requests 庫的預設值</li>
+                    <li style="margin-bottom: 0.5rem;"><strong>responseCode: 500</strong>：後端錯誤也可能提高威脅評分</li>
+                    <li style="margin-bottom: 0.5rem;"><strong>合法請求</strong>：這是正常的訂單狀態更新 API 呼叫</li>
+                </ul>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--amber); font-size: 0.875rem;">解決建議：</h4>
+                <ul style="color: var(--text-secondary); margin-top: 0.5rem; padding-left: 1.5rem;">
+                    <li style="margin-bottom: 0.5rem;">在程式中設定自訂 User-Agent：<code style="color: var(--phosphor);">headers = {'User-Agent': 'MyApp/1.0 (Internal Service)'}</code></li>
+                    <li style="margin-bottom: 0.5rem;">與 WAF 管理員協調，將特定 API 端點排除 Bot 檢測</li>
+                </ul>
+            </div>
+
+            <!-- Case 3: JSON Malformed -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <span class="attack-badge badge-critical">CASE 3</span>
+                <h3><span class="icon">[JSON]</span> JSON 格式錯誤導致解析器攻擊偵測</h3>
+                <p style="margin-bottom: 1rem;">常見情境：大型 JSON 請求或特殊字元觸發格式檢查</p>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">脫敏後的日誌範例：</h4>
+                <div class="code-block" style="font-size: 0.75rem;">
+                    <code>{
+  <span class="code-keyword">"id"</span>: <span class="code-string">"1051815027092XXXXXX"</span>,
+  <span class="code-keyword">"method"</span>: <span class="code-string">"PUT"</span>,
+  <span class="code-keyword">"url"</span>: <span class="code-string">"L3Byb2R1Y3QvbGl0dGxlLW..."</span>,  <span class="code-comment">// Base64: /product/little-mall/products</span>
+  <span class="code-keyword">"requestStatus"</span>: <span class="code-danger">"blocked"</span>,
+  <span class="code-keyword">"responseCode"</span>: <span class="code-danger">0</span>,  <span class="code-comment">// 請求未到達後端</span>
+  <span class="code-keyword">"violations"</span>: [
+    { <span class="code-keyword">"violation"</span>: { <span class="code-keyword">"name"</span>: <span class="code-danger">"VIOL_JSON_MALFORMED"</span> }, <span class="code-keyword">"isBlocked"</span>: <span class="code-danger">true</span> },
+    { <span class="code-keyword">"violation"</span>: { <span class="code-keyword">"name"</span>: <span class="code-danger">"VIOL_RATING_THREAT"</span> }, <span class="code-keyword">"isBlocked"</span>: <span class="code-danger">true</span> }
+  ],
+  <span class="code-keyword">"enforcementState"</span>: {
+    <span class="code-keyword">"rating"</span>: <span class="code-danger">4</span>,
+    <span class="code-keyword">"attackType"</span>: [
+      { <span class="code-keyword">"name"</span>: <span class="code-string">"Abuse of Functionality"</span> },
+      { <span class="code-keyword">"name"</span>: <span class="code-string">"Other Application Activity"</span> },
+      { <span class="code-keyword">"name"</span>: <span class="code-danger">"JSON Parser Attack"</span> }
+    ]
+  },
+  <span class="code-keyword">"rawRequest"</span>: {
+    <span class="code-keyword">"actualSize"</span>: <span class="code-danger">4999</span>,  <span class="code-comment"># 較大的請求</span>
+    <span class="code-keyword">"isTruncated"</span>: <span class="code-danger">true</span>  <span class="code-comment"># 日誌被截斷</span>
+  },
+  <span class="code-keyword">"requestPolicy"</span>: { <span class="code-keyword">"fullPath"</span>: <span class="code-string">"xxx_specific_xss_bypass"</span> }
+}</code>
+                </div>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--cyan); font-size: 0.875rem;">解碼 rawRequest 分析：</h4>
+                <div class="code-block" style="font-size: 0.75rem;">
+                    <code><span class="code-comment"># 解碼後的 HTTP 請求 (已脫敏)</span>
+PUT /product/xxx/products HTTP/1.1
+Host: merchant-product-api.example.com
+Content-Length: 7457
+Content-Type: application/json
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) ...
+Authorization: Bearer ****** <span class="code-comment"># 已遮蔽</span>
+
+{"product": {
+  "id": "692757XXXXXX",
+  "sku_name_ch": "商品名稱包含特殊字元...",
+  "sku_long_description_ch": "<span class="code-danger">&lt;p&gt;&lt;strong&gt;...HTML 內容...&lt;/strong&gt;&lt;/p&gt;</span>
+    <span class="code-danger">&lt;img src=\"https://...\"&gt;</span>..."  <span class="code-comment"># ← 可能被截斷或包含問題字元</span>
+  ...
+}}</code>
+                </div>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--phosphor); font-size: 0.875rem;">分析重點：</h4>
+                <ul style="color: var(--text-secondary); margin-top: 0.5rem; padding-left: 1.5rem;">
+                    <li style="margin-bottom: 0.5rem;"><strong>VIOL_JSON_MALFORMED</strong>：JSON 格式檢查失敗</li>
+                    <li style="margin-bottom: 0.5rem;"><strong>isTruncated: true</strong>：日誌過大被截斷，可能導致解析問題</li>
+                    <li style="margin-bottom: 0.5rem;"><strong>actualSize: 4999</strong>：請求體較大 (約 5KB)</li>
+                    <li style="margin-bottom: 0.5rem;"><strong>HTML 內容</strong>：JSON 中嵌入的 HTML 可能包含觸發規則的字元</li>
+                    <li style="margin-bottom: 0.5rem;"><strong>responseCode: 0</strong>：請求在 WAF 層就被阻擋，未到達後端</li>
+                </ul>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--amber); font-size: 0.875rem;">解決建議：</h4>
+                <ul style="color: var(--text-secondary); margin-top: 0.5rem; padding-left: 1.5rem;">
+                    <li style="margin-bottom: 0.5rem;">檢查 JSON 格式是否正確，特別是特殊字元的跳脫</li>
+                    <li style="margin-bottom: 0.5rem;">若為合法 HTML 內容，調整 WAF 策略以允許特定欄位含有 HTML</li>
+                    <li style="margin-bottom: 0.5rem;">考慮對大型內容進行分段上傳或 Base64 編碼</li>
+                </ul>
+            </div>
+
+            <!-- Log Analysis Tips -->
+            <div class="rule-demo" style="margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem;">快速分析流程</h3>
+                <div class="code-block">
+                    <code>
+<span class="code-keyword">STEP 1:</span> 確認阻擋狀態
+└─ 檢查 <span class="code-string">requestStatus</span> 和 <span class="code-string">enforcementAction</span>
+
+<span class="code-keyword">STEP 2:</span> 找出造成阻擋的違規
+└─ 在 <span class="code-string">violations[]</span> 中找 <span class="code-danger">isBlocked: true</span> 的項目
+
+<span class="code-keyword">STEP 3:</span> 分析威脅類型
+└─ 查看 <span class="code-string">enforcementState.attackType[]</span> 了解具體原因
+
+<span class="code-keyword">STEP 4:</span> 解碼原始請求
+└─ 使用 Base64 解碼 <span class="code-string">rawRequest.httpRequest</span>
+└─ 找出觸發規則的 Header 或 Body 內容
+
+<span class="code-keyword">STEP 5:</span> 決定處理方式
+├─ <span class="code-phosphor">合法請求被誤擋</span> → 調整 WAF 規則/白名單
+└─ <span class="code-danger">實際攻擊</span> → 加強監控/封鎖來源
+                    </code>
+                </div>
+            </div>
+
+            <!-- Base64 Decoder Tool -->
+            <div class="rule-demo" style="margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Base64 解碼工具</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">貼上 WAF 日誌中的 Base64 編碼字串，快速解碼查看原始內容：</p>
+
+                <div class="rule-input-group">
+                    <input type="text" id="base64-input" placeholder="貼上 Base64 編碼字串，例如：L29hcGkvYXBpL3Byb2R1Y3Qv...">
+                    <button class="btn btn-primary" onclick="decodeBase64()">解碼</button>
+                </div>
+
+                <div id="base64-result"></div>
+
+                <div style="margin-top: 1rem;">
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">範例測試：</p>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                        <button class="btn btn-secondary" onclick="setBase64('L29hcGkvYXBpL3Byb2R1Y3QvaGt0di9wcm9kdWN0L2RldGFpbHM=')">/oapi/api/...</button>
+                        <button class="btn btn-secondary" onclick="setBase64('L29hcGkvYXBpL29yZGVyL3VwZGF0ZU9yZGVyU3RhdHVz')">/oapi/api/order/...</button>
+                        <button class="btn btn-secondary" onclick="setBase64('L3Byb2R1Y3QvbGl0dGxlLW1hbGwvcHJvZHVjdHM=')">/product/...</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Interactive Quiz Section -->
         <section id="quiz">
             <h2>實戰練習</h2>
@@ -1825,6 +2170,57 @@ Tomcat: 取第一個
 
         // Initialize quiz
         loadQuestion();
+
+        // Base64 Decoder for WAF Log Analysis
+        function decodeBase64() {
+            const input = document.getElementById('base64-input').value.trim();
+            const resultDiv = document.getElementById('base64-result');
+
+            if (!input) {
+                resultDiv.innerHTML = '';
+                return;
+            }
+
+            try {
+                // Handle URL-safe Base64
+                let normalizedInput = input.replace(/-/g, '+').replace(/_/g, '/');
+                // Add padding if needed
+                while (normalizedInput.length % 4) {
+                    normalizedInput += '=';
+                }
+
+                const decoded = atob(normalizedInput);
+                // Try to detect if it's valid UTF-8 text
+                const utf8Decoded = decodeURIComponent(escape(decoded));
+
+                resultDiv.innerHTML = `
+                    <div class="detection-result detection-allowed">
+                        <strong style="color: var(--phosphor); font-family: 'JetBrains Mono', monospace; font-size: 0.875rem;">[DECODED] 解碼成功</strong>
+                        <pre style="margin-top: 0.75rem; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.8125rem; white-space: pre-wrap; word-break: break-all; line-height: 1.6;">${escapeHtml(utf8Decoded)}</pre>
+                    </div>
+                `;
+            } catch (e) {
+                resultDiv.innerHTML = `
+                    <div class="detection-result detection-blocked">
+                        <strong style="color: var(--danger); font-family: 'JetBrains Mono', monospace; font-size: 0.875rem;">[ERROR] 解碼失敗</strong>
+                        <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">無效的 Base64 字串或包含非文字內容</p>
+                        <p style="margin-top: 0.25rem; color: var(--text-dim); font-size: 0.75rem;">${escapeHtml(e.message)}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function setBase64(value) {
+            document.getElementById('base64-input').value = value;
+            decodeBase64();
+        }
+
+        // Allow Enter key to trigger decode
+        document.getElementById('base64-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                decodeBase64();
+            }
+        });
 
         // Add scroll animation
         const observer = new IntersectionObserver((entries) => {
