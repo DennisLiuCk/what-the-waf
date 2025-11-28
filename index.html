@@ -987,6 +987,7 @@
                 <li><a href="#rules">rules</a></li>
                 <li><a href="#bypass">bypass</a></li>
                 <li><a href="#log-analysis">logs</a></li>
+                <li><a href="#viol-rating">rating</a></li>
                 <li><a href="#quiz">quiz</a></li>
             </ul>
         </div>
@@ -1794,6 +1795,428 @@ Authorization: Bearer ****** <span class="code-comment"># 已遮蔽</span>
                         <button class="btn btn-secondary" onclick="setBase64('L29hcGkvYXBpL29yZGVyL3VwZGF0ZU9yZGVyU3RhdHVz')">/oapi/api/order/...</button>
                         <button class="btn btn-secondary" onclick="setBase64('L3Byb2R1Y3QvbGl0dGxlLW1hbGwvcHJvZHVjdHM=')">/product/...</button>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIOL_RATING_THREAT Tutorial Section -->
+        <section id="viol-rating">
+            <h2>VIOL_RATING_THREAT 評分機制</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">深入了解 WAF 威脅評分系統的運作原理，掌握不同違規類型的風險分數，快速定位請求被阻擋的真正原因。</p>
+
+            <!-- What is VIOL_RATING_THREAT -->
+            <div class="accordion active">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h4>什麼是 VIOL_RATING_THREAT？</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content" style="max-height: 2000px; padding: 1.25rem;">
+                    <p style="margin-bottom: 1rem;"><code style="color: var(--danger);">VIOL_RATING_THREAT</code> 是 WAF 的<strong>威脅評分閾值違規</strong>。當一個請求的累積威脅評分達到或超過設定的閾值時，就會觸發此違規。</p>
+
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># VIOL_RATING_THREAT 運作流程</span>
+
+<span class="code-keyword">REQUEST</span> → <span class="code-string">[WAF 分析]</span> → <span class="code-keyword">累積各種違規的評分</span>
+
+<span class="code-comment"># 評分累積範例</span>
+├─ VIOL_BOT_CLIENT          +1 分  <span class="code-comment">(偵測到 Bot)</span>
+├─ VIOL_HTTP_RESPONSE_STATUS +2 分  <span class="code-comment">(異常回應狀態)</span>
+└─ 其他攻擊特徵             +1 分
+                           ─────
+<span class="code-keyword">總分:</span> <span class="code-danger">4 分</span> → 超過閾值 → <span class="code-danger">VIOL_RATING_THREAT 觸發阻擋</span>
+                        </code>
+                    </div>
+
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">
+                        <strong style="color: var(--amber);">重要觀念：</strong>
+                        <code style="color: var(--danger);">VIOL_RATING_THREAT</code> 本身不是具體的攻擊類型，而是「評分超標」的指標。
+                        要找出真正的阻擋原因，需要分析<strong>哪些違規貢獻了分數</strong>。
+                    </p>
+                </div>
+            </div>
+
+            <!-- Scoring System -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h4>評分等級與閾值</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p style="margin-bottom: 1rem;">WAF 使用 1-5 的評分等級來評估請求的威脅程度：</p>
+
+                    <div class="card-grid" style="margin-bottom: 1.5rem;">
+                        <div class="card" style="border-left: 3px solid var(--phosphor);">
+                            <h3><span class="icon">[1]</span> 最低風險</h3>
+                            <p>輕微異常，通常不會造成阻擋。例如：缺少某些標準 Header。</p>
+                        </div>
+                        <div class="card" style="border-left: 3px solid var(--cyan);">
+                            <h3><span class="icon">[2]</span> 低風險</h3>
+                            <p>偵測到潛在風險行為，但不足以單獨觸發阻擋。例如：非瀏覽器 User-Agent。</p>
+                        </div>
+                        <div class="card" style="border-left: 3px solid var(--amber);">
+                            <h3><span class="icon">[3]</span> 中風險</h3>
+                            <p>可疑行為，可能與其他因素累積後觸發阻擋。例如：異常參數格式。</p>
+                        </div>
+                        <div class="card" style="border-left: 3px solid #ff6b35;">
+                            <h3><span class="icon">[4]</span> 高風險</h3>
+                            <p>極可能是惡意請求，通常會觸發阻擋。例如：匹配已知攻擊特徵。</p>
+                        </div>
+                        <div class="card" style="border-left: 3px solid var(--danger);">
+                            <h3><span class="icon">[5]</span> 嚴重威脅</h3>
+                            <p>幾乎確定是攻擊行為，立即阻擋。例如：SQL 注入、命令注入。</p>
+                        </div>
+                    </div>
+
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 常見閾值設定</span>
+<span class="code-keyword">blocking_threshold</span>: <span class="code-danger">4</span>  <span class="code-comment"># 評分 >= 4 時觸發 VIOL_RATING_THREAT</span>
+
+<span class="code-comment"># 日誌中的評分顯示</span>
+"enforcementState": {
+  <span class="code-keyword">"isBlocked"</span>: <span class="code-danger">true</span>,
+  <span class="code-keyword">"rating"</span>: <span class="code-danger">4</span>  <span class="code-comment"># ← 這就是累積的威脅評分</span>
+}
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Low Score VIOL Types -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h4>低分違規類型 (Rating 1-2)</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p style="margin-bottom: 1rem;">這些違規類型通常<strong>不會單獨造成阻擋</strong>，但可能與其他違規累積：</p>
+
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 評分 1-2 的違規類型（低風險）</span>
+
+<span class="code-string">VIOL_BOT_CLIENT</span>              <span class="code-comment"># +1~2 偵測到自動化工具/Bot</span>
+├─ 非瀏覽器 User-Agent (如 curl, python-requests)
+├─ 缺少瀏覽器指紋特徵
+└─ 無 JavaScript 執行能力
+
+<span class="code-string">VIOL_HTTP_RESPONSE_STATUS</span>    <span class="code-comment"># +1~2 後端回傳異常狀態碼</span>
+├─ 4xx 錯誤 (400, 401, 403, 404)
+├─ 5xx 錯誤 (500, 502, 503)
+└─ 429 Too Many Requests
+
+<span class="code-string">VIOL_HEADER_LENGTH</span>           <span class="code-comment"># +1 Header 長度異常</span>
+<span class="code-string">VIOL_COOKIE_LENGTH</span>           <span class="code-comment"># +1 Cookie 長度異常</span>
+<span class="code-string">VIOL_REQUEST_LENGTH</span>          <span class="code-comment"># +1~2 請求體過大</span>
+<span class="code-string">VIOL_QUERY_STRING_LENGTH</span>     <span class="code-comment"># +1 查詢字串過長</span>
+                        </code>
+                    </div>
+
+                    <div style="background: var(--phosphor-glow); border: 1px solid var(--phosphor-dim); padding: 1rem; margin-top: 1rem;">
+                        <p style="color: var(--phosphor); font-weight: 500;">📌 常見誤報情境</p>
+                        <ul style="color: var(--text-secondary); margin-top: 0.5rem; padding-left: 1.5rem;">
+                            <li style="margin-bottom: 0.5rem;">後端 API 服務使用 Go/Python/Node.js HTTP 客戶端呼叫</li>
+                            <li style="margin-bottom: 0.5rem;">批次處理腳本或排程任務</li>
+                            <li style="margin-bottom: 0.5rem;">健康檢查探針 (Health Check)</li>
+                            <li style="margin-bottom: 0.5rem;">第三方服務 Webhook 回呼</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- High Score VIOL Types -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h4>高分違規類型 (Rating 3-5)</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p style="margin-bottom: 1rem;">這些違規類型代表<strong>高風險或確認的攻擊行為</strong>，可能單獨觸發阻擋：</p>
+
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 評分 3-5 的違規類型（高風險）</span>
+
+<span class="code-danger">VIOL_ATTACK_SIGNATURE</span>        <span class="code-comment"># +3~5 匹配攻擊特徵庫</span>
+├─ SQL Injection 特徵
+├─ XSS (Cross-Site Scripting) 特徵
+├─ Command Injection 特徵
+├─ Path Traversal 特徵
+└─ 其他 OWASP Top 10 攻擊
+
+<span class="code-danger">VIOL_JSON_MALFORMED</span>          <span class="code-comment"># +3~4 JSON 格式錯誤/攻擊</span>
+├─ 不合法的 JSON 語法
+├─ 深度巢狀結構 (DoS 攻擊)
+└─ 特殊字元未正確跳脫
+
+<span class="code-danger">VIOL_XML_MALFORMED</span>           <span class="code-comment"># +3~4 XML 格式錯誤/攻擊</span>
+├─ XXE (XML External Entity) 攻擊
+├─ XML Bomb (Billion Laughs)
+└─ 不合法的 XML 結構
+
+<span class="code-danger">VIOL_PARAMETER</span>               <span class="code-comment"># +3~4 參數違規</span>
+├─ 未定義的參數名稱
+├─ 參數值超出允許範圍
+└─ 參數類型不符
+
+<span class="code-danger">VIOL_FILETYPE</span>                <span class="code-comment"># +3~4 禁止的檔案類型</span>
+├─ 執行檔上傳嘗試 (.exe, .sh)
+├─ 危險檔案類型 (.php, .jsp)
+└─ 偽裝的檔案副檔名
+
+<span class="code-danger">VIOL_METHOD</span>                  <span class="code-comment"># +2~3 禁止的 HTTP 方法</span>
+├─ TRACE, TRACK (XST 攻擊)
+├─ DELETE, PUT (未授權操作)
+└─ CONNECT (代理濫用)
+                        </code>
+                    </div>
+
+                    <div style="background: var(--danger-glow); border: 1px solid var(--danger); padding: 1rem; margin-top: 1rem;">
+                        <p style="color: var(--danger); font-weight: 500;">⚠️ 高分違規通常代表真實威脅</p>
+                        <ul style="color: var(--text-secondary); margin-top: 0.5rem; padding-left: 1.5rem;">
+                            <li style="margin-bottom: 0.5rem;"><code style="color: var(--danger);">VIOL_ATTACK_SIGNATURE</code> 匹配時，應仔細檢查是否為攻擊</li>
+                            <li style="margin-bottom: 0.5rem;">若為誤報，需與安全團隊協調調整特徵規則</li>
+                            <li style="margin-bottom: 0.5rem;">JSON/XML 格式錯誤可能是前端 Bug 或攻擊嘗試</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Score Accumulation -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h4>評分累積機制詳解</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p style="margin-bottom: 1rem;">WAF 會<strong>綜合評估</strong>多個因素來計算最終評分，而非簡單加總：</p>
+
+                    <div class="code-block">
+                        <code>
+<span class="code-comment"># 評分計算模型（示意）</span>
+
+<span class="code-keyword">最終評分</span> = max(
+    <span class="code-string">單一最高分違規</span>,           <span class="code-comment"># 取最嚴重的違規分數</span>
+    <span class="code-string">多個低分違規的加權累積</span>    <span class="code-comment"># 或累積效應</span>
+)
+
+<span class="code-comment"># 範例 1: 單一高分違規</span>
+VIOL_ATTACK_SIGNATURE (SQL Injection)
+└─ 評分: <span class="code-danger">5</span> → 直接阻擋
+
+<span class="code-comment"># 範例 2: 多個低分累積</span>
+VIOL_BOT_CLIENT           +1
+VIOL_HTTP_RESPONSE_STATUS +2 (429 回應)
+suspicious_pattern        +1
+                         ────
+└─ 累積評分: <span class="code-danger">4</span> → 達到閾值，阻擋
+
+<span class="code-comment"># 範例 3: 雖有違規但未達閾值</span>
+VIOL_BOT_CLIENT           +1
+VIOL_HEADER_LENGTH        +1
+                         ────
+└─ 累積評分: <span class="code-string">2</span> → 未達閾值，放行（但記錄）
+                        </code>
+                    </div>
+
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--cyan); font-size: 0.875rem;">影響評分的額外因素：</h4>
+                    <ul style="color: var(--text-secondary); padding-left: 1.5rem;">
+                        <li style="margin-bottom: 0.5rem;"><strong>攻擊類型 (attackType)</strong>：識別出的攻擊類型會影響基礎分數</li>
+                        <li style="margin-bottom: 0.5rem;"><strong>後端回應狀態</strong>：4xx/5xx 錯誤會增加可疑程度</li>
+                        <li style="margin-bottom: 0.5rem;"><strong>請求頻率</strong>：短時間內大量請求可能提高評分</li>
+                        <li style="margin-bottom: 0.5rem;"><strong>地理位置</strong>：來自高風險區域的請求可能有額外權重</li>
+                        <li style="margin-bottom: 0.5rem;"><strong>歷史行為</strong>：IP 過去的違規記錄可能影響評分</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Common Issues and Solutions -->
+            <h3 style="margin-top: 3rem; margin-bottom: 1.5rem; font-family: 'JetBrains Mono', monospace; color: var(--amber); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.1em;">常見問題與解決方案</h3>
+
+            <!-- Issue 1: API Client Blocked -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <span class="attack-badge badge-high">問題 1</span>
+                <h3><span class="icon">[API]</span> 後端 API 客戶端持續被阻擋</h3>
+
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">典型日誌特徵：</h4>
+                <div class="code-block" style="font-size: 0.75rem;">
+                    <code>"violations": [
+  { "name": "<span class="code-string">VIOL_BOT_CLIENT</span>", "isBlocked": false },
+  { "name": "<span class="code-danger">VIOL_RATING_THREAT</span>", "isBlocked": <span class="code-danger">true</span> }
+],
+"enforcementState": {
+  "rating": <span class="code-danger">4</span>,
+  "attackType": [{ "name": "<span class="code-string">Non-browser Client</span>" }]
+}</code>
+                </div>
+
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: var(--phosphor); font-size: 0.875rem;">原因分析：</h4>
+                <ul style="color: var(--text-secondary); padding-left: 1.5rem;">
+                    <li style="margin-bottom: 0.5rem;">User-Agent 為程式庫預設值 (python-requests, Go-http-client, axios)</li>
+                    <li style="margin-bottom: 0.5rem;">缺少瀏覽器特有的 Header (Accept-Language, Sec-Fetch-*)</li>
+                    <li style="margin-bottom: 0.5rem;">加上後端 4xx/5xx 錯誤，累積達到閾值</li>
+                </ul>
+
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: var(--amber); font-size: 0.875rem;">解決方案：</h4>
+                <div class="code-block" style="font-size: 0.75rem;">
+                    <code><span class="code-comment"># Python 範例 - 設定自訂 User-Agent</span>
+import requests
+
+headers = {
+    <span class="code-string">'User-Agent'</span>: <span class="code-string">'MyApp/1.0 (Internal API Client; contact@example.com)'</span>,
+    <span class="code-string">'Accept'</span>: <span class="code-string">'application/json'</span>
+}
+response = requests.get(url, headers=headers)
+
+<span class="code-comment"># Go 範例</span>
+req.Header.Set(<span class="code-string">"User-Agent"</span>, <span class="code-string">"MyApp/1.0 (Internal Service)"</span>)
+
+<span class="code-comment"># WAF 設定 - 將內部服務 IP 加入白名單</span>
+<span class="code-comment"># 或設定特定 User-Agent 為可信任</span></code>
+                </div>
+            </div>
+
+            <!-- Issue 2: Rating 4 with Multiple Low-Score Violations -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <span class="attack-badge badge-high">問題 2</span>
+                <h3><span class="icon">[SCORE]</span> 多個低分違規累積到 Rating 4</h3>
+
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">典型日誌特徵：</h4>
+                <div class="code-block" style="font-size: 0.75rem;">
+                    <code>"violations": [
+  { "name": "<span class="code-string">VIOL_BOT_CLIENT</span>", "isBlocked": false },
+  { "name": "<span class="code-string">VIOL_HTTP_RESPONSE_STATUS</span>", "isBlocked": false },
+  { "name": "<span class="code-danger">VIOL_RATING_THREAT</span>", "isBlocked": <span class="code-danger">true</span> }
+],
+"responseCode": <span class="code-danger">429</span>,  <span class="code-comment"># 後端回傳 Too Many Requests</span>
+"enforcementState": { "rating": <span class="code-danger">4</span> }</code>
+                </div>
+
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: var(--phosphor); font-size: 0.875rem;">原因分析：</h4>
+                <p style="color: var(--text-secondary);">雖然每個違規分數不高，但累積效應達到阻擋閾值。這種情況常見於：</p>
+                <ul style="color: var(--text-secondary); padding-left: 1.5rem; margin-top: 0.5rem;">
+                    <li style="margin-bottom: 0.5rem;">API 客戶端遇到後端限流 (429)</li>
+                    <li style="margin-bottom: 0.5rem;">後端服務暫時不可用 (503)</li>
+                    <li style="margin-bottom: 0.5rem;">請求參數導致後端錯誤 (500)</li>
+                </ul>
+
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: var(--amber); font-size: 0.875rem;">解決方案：</h4>
+                <ul style="color: var(--text-secondary); padding-left: 1.5rem;">
+                    <li style="margin-bottom: 0.5rem;">調整 WAF 策略，將 VIOL_HTTP_RESPONSE_STATUS 的權重降低</li>
+                    <li style="margin-bottom: 0.5rem;">為特定 API 路徑設定較高的閾值</li>
+                    <li style="margin-bottom: 0.5rem;">修復後端問題，減少 4xx/5xx 錯誤發生</li>
+                </ul>
+            </div>
+
+            <!-- Issue 3: JSON Malformed -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <span class="attack-badge badge-critical">問題 3</span>
+                <h3><span class="icon">[JSON]</span> VIOL_JSON_MALFORMED 直接觸發高分</h3>
+
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">典型日誌特徵：</h4>
+                <div class="code-block" style="font-size: 0.75rem;">
+                    <code>"violations": [
+  { "name": "<span class="code-danger">VIOL_JSON_MALFORMED</span>", "isBlocked": <span class="code-danger">true</span> },
+  { "name": "<span class="code-danger">VIOL_RATING_THREAT</span>", "isBlocked": <span class="code-danger">true</span> }
+],
+"enforcementState": {
+  "rating": <span class="code-danger">4</span>,
+  "attackType": [{ "name": "<span class="code-danger">JSON Parser Attack</span>" }]
+},
+"responseCode": <span class="code-danger">0</span>  <span class="code-comment"># 請求被 WAF 攔截，未到達後端</span></code>
+                </div>
+
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: var(--phosphor); font-size: 0.875rem;">常見觸發原因：</h4>
+                <ul style="color: var(--text-secondary); padding-left: 1.5rem;">
+                    <li style="margin-bottom: 0.5rem;">JSON 中包含未正確跳脫的特殊字元 (<code style="color: var(--danger);">\", \\, \n</code>)</li>
+                    <li style="margin-bottom: 0.5rem;">JSON 值中包含 HTML 標籤 (<code style="color: var(--danger);">&lt;script&gt;, &lt;img&gt;</code>)</li>
+                    <li style="margin-bottom: 0.5rem;">大型或深度巢狀的 JSON 結構</li>
+                    <li style="margin-bottom: 0.5rem;">Content-Type 與實際內容不符</li>
+                </ul>
+
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: var(--amber); font-size: 0.875rem;">解決方案：</h4>
+                <div class="code-block" style="font-size: 0.75rem;">
+                    <code><span class="code-comment"># 1. 確保 JSON 正確編碼</span>
+import json
+data = {"content": "包含 <script> 的文字"}
+json_str = json.dumps(data)  <span class="code-comment"># 會自動跳脫特殊字元</span>
+
+<span class="code-comment"># 2. 若需要傳送 HTML 內容，考慮 Base64 編碼</span>
+import base64
+html_content = base64.b64encode(html.encode()).decode()
+data = {"html_base64": html_content}
+
+<span class="code-comment"># 3. 與 WAF 管理員協調，設定例外規則</span>
+<span class="code-comment"># 允許特定欄位包含 HTML 內容</span></code>
+                </div>
+            </div>
+
+            <!-- Quick Reference Table -->
+            <div class="rule-demo" style="margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem;">違規類型與評分快速參考</h3>
+                <div class="code-block">
+                    <code>
+<span class="code-keyword">違規類型                          評分    說明</span>
+────────────────────────────────────────────────────────────────
+<span class="code-comment"># 低分違規 (通常不單獨造成阻擋)</span>
+<span class="code-string">VIOL_BOT_CLIENT</span>                   1-2    非瀏覽器客戶端
+<span class="code-string">VIOL_HTTP_RESPONSE_STATUS</span>         1-2    異常 HTTP 回應狀態
+<span class="code-string">VIOL_HEADER_LENGTH</span>                1      Header 長度異常
+<span class="code-string">VIOL_COOKIE_LENGTH</span>                1      Cookie 長度異常
+<span class="code-string">VIOL_ENCODING</span>                     1-2    編碼異常
+
+<span class="code-comment"># 中分違規 (需關注)</span>
+<span class="code-string">VIOL_METHOD</span>                       2-3    禁止的 HTTP 方法
+<span class="code-string">VIOL_URL</span>                          2-3    URL 格式異常
+<span class="code-string">VIOL_PARAMETER</span>                    2-4    參數違規
+
+<span class="code-comment"># 高分違規 (通常直接阻擋)</span>
+<span class="code-danger">VIOL_ATTACK_SIGNATURE</span>             3-5    匹配攻擊特徵
+<span class="code-danger">VIOL_JSON_MALFORMED</span>               3-4    JSON 格式錯誤
+<span class="code-danger">VIOL_XML_MALFORMED</span>                3-4    XML 格式錯誤
+<span class="code-danger">VIOL_FILETYPE</span>                     3-4    禁止的檔案類型
+
+────────────────────────────────────────────────────────────────
+<span class="code-keyword">閾值</span>: 累積評分 >= <span class="code-danger">4</span> 時觸發 <span class="code-danger">VIOL_RATING_THREAT</span> 阻擋
+                    </code>
+                </div>
+            </div>
+
+            <!-- Diagnostic Flowchart -->
+            <div class="rule-demo" style="margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem;">VIOL_RATING_THREAT 診斷流程</h3>
+                <div class="code-block">
+                    <code>
+<span class="code-keyword">收到 VIOL_RATING_THREAT 阻擋</span>
+│
+├─<span class="code-keyword">Step 1:</span> 檢查 violations[] 陣列
+│  └─ 找出所有 violation.name
+│
+├─<span class="code-keyword">Step 2:</span> 區分違規類型
+│  ├─ <span class="code-danger">高分違規</span> (VIOL_ATTACK_SIGNATURE, VIOL_JSON_MALFORMED...)
+│  │  └─ 直接分析該違規的觸發原因
+│  │
+│  └─ <span class="code-string">只有低分違規</span> (VIOL_BOT_CLIENT, VIOL_HTTP_RESPONSE_STATUS...)
+│     └─ 是累積效應，需分析多個因素
+│
+├─<span class="code-keyword">Step 3:</span> 解碼 rawRequest
+│  └─ 找出觸發規則的具體內容
+│     ├─ User-Agent 是什麼？
+│     ├─ 請求參數有問題嗎？
+│     └─ Body 內容是否包含可疑字串？
+│
+├─<span class="code-keyword">Step 4:</span> 檢查 responseCode
+│  ├─ <span class="code-string">200</span> → 後端正常回應
+│  ├─ <span class="code-amber">4xx</span> → 客戶端錯誤，可能增加評分
+│  ├─ <span class="code-danger">5xx</span> → 後端錯誤，可能增加評分
+│  └─ <span class="code-danger">0</span>   → 被 WAF 攔截，未到達後端
+│
+└─<span class="code-keyword">Step 5:</span> 決定處理方式
+   ├─ <span class="code-phosphor">合法請求</span> → 調整 WAF 規則/加白名單
+   ├─ <span class="code-amber">可疑請求</span> → 持續監控，收集更多資訊
+   └─ <span class="code-danger">確認攻擊</span> → 加強防護，可考慮封鎖來源
+                    </code>
                 </div>
             </div>
         </section>
