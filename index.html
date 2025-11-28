@@ -1775,28 +1775,6 @@ Authorization: Bearer ****** <span class="code-comment"># 已遮蔽</span>
                     </code>
                 </div>
             </div>
-
-            <!-- Base64 Decoder Tool -->
-            <div class="rule-demo" style="margin-top: 2rem;">
-                <h3 style="margin-bottom: 1rem;">Base64 解碼工具</h3>
-                <p style="color: var(--text-secondary); margin-bottom: 1rem;">貼上 WAF 日誌中的 Base64 編碼字串，快速解碼查看原始內容：</p>
-
-                <div class="rule-input-group">
-                    <input type="text" id="base64-input" placeholder="貼上 Base64 編碼字串，例如：L29hcGkvYXBpL3Byb2R1Y3Qv...">
-                    <button class="btn btn-primary" onclick="decodeBase64()">解碼</button>
-                </div>
-
-                <div id="base64-result"></div>
-
-                <div style="margin-top: 1rem;">
-                    <p style="color: var(--text-secondary); font-size: 0.875rem;">範例測試：</p>
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                        <button class="btn btn-secondary" onclick="setBase64('L29hcGkvYXBpL3Byb2R1Y3QvaGt0di9wcm9kdWN0L2RldGFpbHM=')">/oapi/api/...</button>
-                        <button class="btn btn-secondary" onclick="setBase64('L29hcGkvYXBpL29yZGVyL3VwZGF0ZU9yZGVyU3RhdHVz')">/oapi/api/order/...</button>
-                        <button class="btn btn-secondary" onclick="setBase64('L3Byb2R1Y3QvbGl0dGxlLW1hbGwvcHJvZHVjdHM=')">/product/...</button>
-                    </div>
-                </div>
-            </div>
         </section>
 
         <!-- VIOL_RATING_THREAT Tutorial Section -->
@@ -2593,57 +2571,6 @@ data = {"html_base64": html_content}
 
         // Initialize quiz
         loadQuestion();
-
-        // Base64 Decoder for WAF Log Analysis
-        function decodeBase64() {
-            const input = document.getElementById('base64-input').value.trim();
-            const resultDiv = document.getElementById('base64-result');
-
-            if (!input) {
-                resultDiv.innerHTML = '';
-                return;
-            }
-
-            try {
-                // Handle URL-safe Base64
-                let normalizedInput = input.replace(/-/g, '+').replace(/_/g, '/');
-                // Add padding if needed
-                while (normalizedInput.length % 4) {
-                    normalizedInput += '=';
-                }
-
-                const decoded = atob(normalizedInput);
-                // Try to detect if it's valid UTF-8 text
-                const utf8Decoded = decodeURIComponent(escape(decoded));
-
-                resultDiv.innerHTML = `
-                    <div class="detection-result detection-allowed">
-                        <strong style="color: var(--phosphor); font-family: 'JetBrains Mono', monospace; font-size: 0.875rem;">[DECODED] 解碼成功</strong>
-                        <pre style="margin-top: 0.75rem; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.8125rem; white-space: pre-wrap; word-break: break-all; line-height: 1.6;">${escapeHtml(utf8Decoded)}</pre>
-                    </div>
-                `;
-            } catch (e) {
-                resultDiv.innerHTML = `
-                    <div class="detection-result detection-blocked">
-                        <strong style="color: var(--danger); font-family: 'JetBrains Mono', monospace; font-size: 0.875rem;">[ERROR] 解碼失敗</strong>
-                        <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">無效的 Base64 字串或包含非文字內容</p>
-                        <p style="margin-top: 0.25rem; color: var(--text-dim); font-size: 0.75rem;">${escapeHtml(e.message)}</p>
-                    </div>
-                `;
-            }
-        }
-
-        function setBase64(value) {
-            document.getElementById('base64-input').value = value;
-            decodeBase64();
-        }
-
-        // Allow Enter key to trigger decode
-        document.getElementById('base64-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                decodeBase64();
-            }
-        });
 
         // Add scroll animation
         const observer = new IntersectionObserver((entries) => {
