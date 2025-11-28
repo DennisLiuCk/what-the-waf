@@ -2117,7 +2117,7 @@ req.Header.Set(<span class="code-string">"User-Agent"</span>, <span class="code-
                 <div class="code-block" style="font-size: 0.75rem;">
                     <code><span class="code-comment"># 1. 確保 JSON 正確編碼</span>
 import json
-data = {"content": "包含 <script> 的文字"}
+data = {"content": "包含 &lt;script&gt; 的文字"}
 json_str = json.dumps(data)  <span class="code-comment"># 會自動跳脫特殊字元</span>
 
 <span class="code-comment"># 2. 若需要傳送 HTML 內容，考慮 Base64 編碼</span>
