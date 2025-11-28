@@ -1324,11 +1324,11 @@ REQUEST-942-APPLICATION-ATTACK-SQLI <span class="code-comment"># SQL 注入</spa
                 <div style="margin-top: 1rem;">
                     <p style="color: var(--text-secondary); font-size: 0.875rem;">快速測試：</p>
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                        <button class="btn btn-secondary" onclick="setPayload(`' OR '1'='1`)">SQLi 基本</button>
-                        <button class="btn btn-secondary" onclick="setPayload(`<script>alert(1)</script>`)">XSS 基本</button>
-                        <button class="btn btn-secondary" onclick="setPayload(`; cat /etc/passwd`)">命令注入</button>
-                        <button class="btn btn-secondary" onclick="setPayload(`../../../etc/passwd`)">路徑穿越</button>
-                        <button class="btn btn-secondary" onclick="setPayload(`hello world`)">正常輸入</button>
+                        <button class="btn btn-secondary" data-payload="' OR '1'='1">SQLi 基本</button>
+                        <button class="btn btn-secondary" data-payload="&lt;script&gt;alert(1)&lt;/script&gt;">XSS 基本</button>
+                        <button class="btn btn-secondary" data-payload="; cat /etc/passwd">命令注入</button>
+                        <button class="btn btn-secondary" data-payload="../../../etc/passwd">路徑穿越</button>
+                        <button class="btn btn-secondary" data-payload="hello world">正常輸入</button>
                     </div>
                 </div>
             </div>
@@ -1608,6 +1608,20 @@ Tomcat: 取第一個
             checkWAF();
         }
 
+        // Setup payload buttons with data attributes
+        document.querySelectorAll('[data-payload]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                setPayload(this.dataset.payload);
+            });
+        });
+
+        // HTML escape helper function
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // Quiz System
         const quizQuestions = [
             {
@@ -1616,7 +1630,7 @@ Tomcat: 取第一個
                 options: [
                     "SELECT * FROM users WHERE id=1",
                     "' OR '1'='1",
-                    "<script>alert(1)</script>",
+                    "<script>alert(1)<\/script>",
                     "../../../etc/passwd"
                 ],
                 correct: 1,
@@ -1688,7 +1702,7 @@ Tomcat: 取第一個
                         className += ' incorrect';
                     }
                 }
-                return `<div class="${className}" onclick="selectAnswer(${index})">${option}</div>`;
+                return `<div class="${className}" onclick="selectAnswer(${index})">${escapeHtml(option)}</div>`;
             }).join('');
 
             let explanationHtml = '';
