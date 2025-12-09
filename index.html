@@ -1133,6 +1133,430 @@
             outline: 2px solid var(--phosphor);
             outline-offset: 2px;
         }
+
+        /* === NEW INTERACTIVE COMPONENTS === */
+
+        /* Encoder Tool */
+        .encoder-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .encoder-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .encoder-box {
+            background: var(--obsidian);
+            border: 1px solid var(--border);
+            padding: 1rem;
+        }
+
+        .encoder-box label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6875rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .encoder-box textarea {
+            width: 100%;
+            height: 120px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--phosphor);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            padding: 0.75rem;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        .encoder-box textarea:focus {
+            outline: none;
+            border-color: var(--phosphor-dim);
+        }
+
+        .encoder-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+
+        .encoder-type-btn {
+            font-family: 'JetBrains Mono', monospace;
+            padding: 0.5rem 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .encoder-type-btn:hover {
+            border-color: var(--phosphor-dim);
+            color: var(--phosphor);
+        }
+
+        .encoder-type-btn.active {
+            background: var(--phosphor-glow);
+            border-color: var(--phosphor);
+            color: var(--phosphor);
+        }
+
+        .encoder-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--phosphor);
+        }
+
+        @media (max-width: 768px) {
+            .encoder-arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        /* Score Calculator */
+        .score-calculator {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+        }
+
+        .score-display {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--obsidian);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .score-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, var(--phosphor-glow) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .score-display.warning::before {
+            background: linear-gradient(135deg, transparent 0%, var(--amber-glow) 100%);
+            opacity: 1;
+        }
+
+        .score-display.blocked::before {
+            background: linear-gradient(135deg, transparent 0%, var(--danger-glow) 100%);
+            opacity: 1;
+        }
+
+        .score-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--phosphor);
+            position: relative;
+            z-index: 1;
+            transition: color 0.3s;
+        }
+
+        .score-display.warning .score-number {
+            color: var(--amber);
+        }
+
+        .score-display.blocked .score-number {
+            color: var(--danger);
+            animation: blocked-pulse 0.5s ease;
+        }
+
+        .score-status {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .score-threshold {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 0.25rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .violation-checklist {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .violation-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--obsidian);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .violation-item:hover {
+            border-color: var(--phosphor-dim);
+        }
+
+        .violation-item.checked {
+            border-color: var(--phosphor);
+            background: var(--phosphor-glow);
+        }
+
+        .violation-item.high-risk.checked {
+            border-color: var(--danger);
+            background: var(--danger-glow);
+        }
+
+        .violation-checkbox {
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--text-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: transparent;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .violation-item.checked .violation-checkbox {
+            border-color: var(--phosphor);
+            color: var(--phosphor);
+        }
+
+        .violation-item.high-risk.checked .violation-checkbox {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .violation-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .violation-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-primary);
+            word-break: break-all;
+        }
+
+        .violation-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6875rem;
+            color: var(--text-dim);
+        }
+
+        /* Bypass Challenge */
+        .challenge-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+        }
+
+        .challenge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .challenge-level {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .level-btn {
+            font-family: 'JetBrains Mono', monospace;
+            padding: 0.5rem 1rem;
+            background: var(--obsidian);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .level-btn:hover {
+            border-color: var(--phosphor-dim);
+            color: var(--text-secondary);
+        }
+
+        .level-btn.active {
+            border-color: var(--phosphor);
+            color: var(--phosphor);
+            background: var(--phosphor-glow);
+        }
+
+        .level-btn.completed {
+            border-color: var(--phosphor);
+            color: var(--phosphor);
+        }
+
+        .level-btn.completed::after {
+            content: ' ✓';
+        }
+
+        .challenge-stats {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .challenge-mission {
+            background: var(--obsidian);
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .challenge-mission h4 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6875rem;
+            color: var(--amber);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .challenge-target {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--surface);
+            padding: 0.75rem;
+            color: var(--danger);
+            font-size: 0.875rem;
+            margin: 0.75rem 0;
+            border-left: 3px solid var(--danger);
+        }
+
+        .challenge-hint {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: var(--amber-glow);
+            border: 1px solid var(--amber-dim);
+            display: none;
+        }
+
+        .challenge-hint.show {
+            display: block;
+        }
+
+        .challenge-input-area {
+            margin-bottom: 1rem;
+        }
+
+        .challenge-input {
+            width: 100%;
+            padding: 1rem;
+            background: var(--obsidian);
+            border: 1px solid var(--border);
+            color: var(--phosphor);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .challenge-input:focus {
+            outline: none;
+            border-color: var(--phosphor-dim);
+            box-shadow: 0 0 0 3px var(--phosphor-glow);
+        }
+
+        .challenge-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .challenge-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border: 1px solid;
+            display: none;
+        }
+
+        .challenge-result.show {
+            display: block;
+        }
+
+        .challenge-result.success {
+            background: var(--phosphor-glow);
+            border-color: var(--phosphor);
+        }
+
+        .challenge-result.fail {
+            background: var(--danger-glow);
+            border-color: var(--danger);
+        }
+
+        .challenge-result h5 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .challenge-result.success h5 {
+            color: var(--phosphor);
+        }
+
+        .challenge-result.fail h5 {
+            color: var(--danger);
+        }
+
+        /* Terminal typing effect */
+        .terminal-output {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            padding: 0.5rem 0;
+        }
+
+        .terminal-output .cmd {
+            color: var(--phosphor);
+        }
+
+        .terminal-output .error {
+            color: var(--danger);
+        }
+
+        .terminal-output .success {
+            color: var(--phosphor);
+        }
+
+        .terminal-output .warning {
+            color: var(--amber);
+        }
     </style>
 </head>
 <body>
@@ -1145,8 +1569,8 @@
                 <li><a href="#attacks">attacks</a></li>
                 <li><a href="#rules">rules</a></li>
                 <li><a href="#bypass">bypass</a></li>
-                <li><a href="#log-analysis">logs</a></li>
-                <li><a href="#viol-rating">rating</a></li>
+                <li><a href="#tools">tools</a></li>
+                <li><a href="#challenge">challenge</a></li>
                 <li><a href="#quiz">quiz</a></li>
             </ul>
         </div>
@@ -2402,6 +2826,193 @@ data = {"html_base64": html_content}
             </div>
         </section>
 
+        <!-- Interactive Tools Section -->
+        <section id="tools">
+            <h2>實用工具箱</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">動手試試這些工具，理解編碼轉換與評分機制如何影響 WAF 的判斷。</p>
+
+            <!-- Payload Encoder/Decoder -->
+            <div class="rule-demo" style="margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 0.5rem;">Payload 編碼轉換器</h3>
+                <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">了解攻擊者如何使用編碼來嘗試繞過 WAF 檢測</p>
+
+                <div class="encoder-actions" style="margin-bottom: 1rem;">
+                    <button class="encoder-type-btn active" data-encode="url">URL Encode</button>
+                    <button class="encoder-type-btn" data-encode="base64">Base64</button>
+                    <button class="encoder-type-btn" data-encode="html">HTML Entities</button>
+                    <button class="encoder-type-btn" data-encode="unicode">Unicode</button>
+                    <button class="encoder-type-btn" data-encode="double">雙重編碼</button>
+                </div>
+
+                <div class="encoder-container">
+                    <div class="encoder-box">
+                        <label>$ input <span style="color: var(--text-dim);">(原始文字)</span></label>
+                        <textarea id="encoder-input" placeholder="輸入要編碼的文字，例如：' OR 1=1--"></textarea>
+                    </div>
+                    <div class="encoder-box">
+                        <label>$ output <span style="color: var(--text-dim);">(編碼結果)</span></label>
+                        <textarea id="encoder-output" readonly placeholder="編碼結果將顯示在這裡..."></textarea>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="encodePayload()">編碼 →</button>
+                    <button class="btn btn-secondary" onclick="decodePayload()">← 解碼</button>
+                    <button class="btn btn-secondary" onclick="swapEncoder()">⇄ 交換</button>
+                    <button class="btn btn-secondary" onclick="clearEncoder()">清除</button>
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <p style="color: var(--text-dim); font-size: 0.75rem;">快速範例：</p>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                        <button class="btn btn-secondary" style="font-size: 0.6875rem;" onclick="setEncoderInput(`' OR '1'='1`)">SQLi 基本</button>
+                        <button class="btn btn-secondary" style="font-size: 0.6875rem;" onclick="setEncoderInput('<script>alert(1)</script>')">XSS</button>
+                        <button class="btn btn-secondary" style="font-size: 0.6875rem;" onclick="setEncoderInput('../../../etc/passwd')">Path Traversal</button>
+                    </div>
+                </div>
+
+                <div class="terminal-output" id="encoder-log" style="margin-top: 1rem; display: none;"></div>
+            </div>
+
+            <!-- Score Calculator -->
+            <div class="rule-demo">
+                <h3 style="margin-bottom: 0.5rem;">威脅評分計算器</h3>
+                <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1.5rem;">選擇違規類型，觀察評分如何累積並觸發 VIOL_RATING_THREAT</p>
+
+                <div class="score-calculator">
+                    <div class="score-display" id="score-display">
+                        <div class="score-number" id="score-number">0</div>
+                        <div class="score-status" id="score-status" style="color: var(--phosphor);">[ALLOWED] 請求放行</div>
+                        <div class="score-threshold">blocking_threshold: 4</div>
+                    </div>
+
+                    <p style="color: var(--text-dim); font-size: 0.75rem; margin-bottom: 0.75rem; font-family: 'JetBrains Mono', monospace;">// LOW_RISK_VIOLATIONS</p>
+                    <div class="violation-checklist" style="margin-bottom: 1.5rem;">
+                        <div class="violation-item" data-score="1" onclick="toggleViolation(this)">
+                            <div class="violation-checkbox">✓</div>
+                            <div class="violation-info">
+                                <div class="violation-name">VIOL_BOT_CLIENT</div>
+                                <div class="violation-score">+1 偵測到非瀏覽器客戶端</div>
+                            </div>
+                        </div>
+                        <div class="violation-item" data-score="1" onclick="toggleViolation(this)">
+                            <div class="violation-checkbox">✓</div>
+                            <div class="violation-info">
+                                <div class="violation-name">VIOL_HEADER_LENGTH</div>
+                                <div class="violation-score">+1 Header 長度異常</div>
+                            </div>
+                        </div>
+                        <div class="violation-item" data-score="2" onclick="toggleViolation(this)">
+                            <div class="violation-checkbox">✓</div>
+                            <div class="violation-info">
+                                <div class="violation-name">VIOL_HTTP_RESPONSE_STATUS</div>
+                                <div class="violation-score">+2 異常 HTTP 回應 (4xx/5xx)</div>
+                            </div>
+                        </div>
+                        <div class="violation-item" data-score="1" onclick="toggleViolation(this)">
+                            <div class="violation-checkbox">✓</div>
+                            <div class="violation-info">
+                                <div class="violation-name">VIOL_ENCODING</div>
+                                <div class="violation-score">+1 編碼異常</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p style="color: var(--danger); font-size: 0.75rem; margin-bottom: 0.75rem; font-family: 'JetBrains Mono', monospace;">// HIGH_RISK_VIOLATIONS</p>
+                    <div class="violation-checklist">
+                        <div class="violation-item high-risk" data-score="3" onclick="toggleViolation(this)">
+                            <div class="violation-checkbox">✓</div>
+                            <div class="violation-info">
+                                <div class="violation-name">VIOL_PARAMETER</div>
+                                <div class="violation-score">+3 參數違規</div>
+                            </div>
+                        </div>
+                        <div class="violation-item high-risk" data-score="4" onclick="toggleViolation(this)">
+                            <div class="violation-checkbox">✓</div>
+                            <div class="violation-info">
+                                <div class="violation-name">VIOL_JSON_MALFORMED</div>
+                                <div class="violation-score">+4 JSON 格式錯誤</div>
+                            </div>
+                        </div>
+                        <div class="violation-item high-risk" data-score="4" onclick="toggleViolation(this)">
+                            <div class="violation-checkbox">✓</div>
+                            <div class="violation-info">
+                                <div class="violation-name">VIOL_ATTACK_SIGNATURE</div>
+                                <div class="violation-score">+4 匹配攻擊特徵</div>
+                            </div>
+                        </div>
+                        <div class="violation-item high-risk" data-score="3" onclick="toggleViolation(this)">
+                            <div class="violation-checkbox">✓</div>
+                            <div class="violation-info">
+                                <div class="violation-name">VIOL_FILETYPE</div>
+                                <div class="violation-score">+3 禁止的檔案類型</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary" onclick="resetScoreCalculator()">$ reset</button>
+                        <button class="btn btn-secondary" onclick="simulateApiClient()">模擬 API 客戶端</button>
+                        <button class="btn btn-secondary" onclick="simulateAttack()">模擬攻擊請求</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bypass Challenge Section -->
+        <section id="challenge">
+            <h2>繞過挑戰</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">運用你學到的知識，嘗試繞過 WAF 規則。這有助於理解防護的弱點與如何加強。</p>
+
+            <div class="challenge-container">
+                <div class="challenge-header">
+                    <div class="challenge-level">
+                        <button class="level-btn active" data-level="0">Level 1</button>
+                        <button class="level-btn" data-level="1">Level 2</button>
+                        <button class="level-btn" data-level="2">Level 3</button>
+                        <button class="level-btn" data-level="3">Level 4</button>
+                        <button class="level-btn" data-level="4">Level 5</button>
+                    </div>
+                    <div class="challenge-stats">
+                        完成: <span id="challenge-completed">0</span>/5
+                    </div>
+                </div>
+
+                <div class="challenge-mission" id="challenge-mission">
+                    <h4>// MISSION_BRIEFING</h4>
+                    <p id="challenge-description">載入中...</p>
+                    <div class="challenge-target" id="challenge-target"></div>
+                    <p style="color: var(--text-dim); font-size: 0.8125rem; margin-top: 0.75rem;">
+                        <span style="color: var(--amber);">目標：</span> <span id="challenge-goal"></span>
+                    </p>
+                    <div class="challenge-hint" id="challenge-hint"></div>
+                </div>
+
+                <div class="challenge-input-area">
+                    <input type="text" class="challenge-input" id="challenge-input" placeholder="輸入你的 payload...">
+                </div>
+
+                <div class="challenge-actions">
+                    <button class="btn btn-primary" onclick="submitChallenge()">$ ./exploit</button>
+                    <button class="btn btn-secondary" onclick="showHint()">💡 提示</button>
+                    <button class="btn btn-secondary" onclick="testInSimulator()">在模擬器測試</button>
+                </div>
+
+                <div class="challenge-result" id="challenge-result">
+                    <h5 id="challenge-result-title"></h5>
+                    <p id="challenge-result-message" style="color: var(--text-secondary); font-size: 0.875rem;"></p>
+                    <div id="challenge-result-detail" style="margin-top: 0.75rem;"></div>
+                </div>
+
+                <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                    <h4 style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--amber); margin-bottom: 1rem;">// DEFENSE_RECOMMENDATIONS</h4>
+                    <div id="challenge-defense" style="color: var(--text-secondary); font-size: 0.875rem;">
+                        完成挑戰後，這裡會顯示如何防護這類繞過技術。
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Interactive Quiz Section -->
         <section id="quiz">
             <h2>實戰練習</h2>
@@ -2784,8 +3395,469 @@ data = {"html_base64": html_content}
             });
         }, { threshold: 0.1 });
 
-        document.querySelectorAll('.card, .accordion, .rule-demo, .quiz-container').forEach(el => {
+        document.querySelectorAll('.card, .accordion, .rule-demo, .quiz-container, .challenge-container, .score-calculator').forEach(el => {
             observer.observe(el);
+        });
+
+        // ========================================
+        // ENCODER/DECODER TOOL
+        // ========================================
+        let currentEncodeType = 'url';
+
+        // Encoder type selection
+        document.querySelectorAll('.encoder-type-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.encoder-type-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentEncodeType = this.dataset.encode;
+                // Auto-encode if there's input
+                if (document.getElementById('encoder-input').value) {
+                    encodePayload();
+                }
+            });
+        });
+
+        function encodePayload() {
+            const input = document.getElementById('encoder-input').value;
+            const output = document.getElementById('encoder-output');
+            const log = document.getElementById('encoder-log');
+
+            if (!input) {
+                output.value = '';
+                return;
+            }
+
+            let result = '';
+            let logMessage = '';
+
+            switch (currentEncodeType) {
+                case 'url':
+                    result = encodeURIComponent(input);
+                    logMessage = `<span class="cmd">$ urlencode</span> "${escapeHtml(input.substring(0, 30))}${input.length > 30 ? '...' : ''}"`;
+                    break;
+                case 'base64':
+                    try {
+                        result = btoa(unescape(encodeURIComponent(input)));
+                        logMessage = `<span class="cmd">$ base64</span> -e`;
+                    } catch (e) {
+                        result = '[ERROR] 無法編碼';
+                        logMessage = `<span class="error">[ERROR]</span> Base64 編碼失敗`;
+                    }
+                    break;
+                case 'html':
+                    result = input.split('').map(c => {
+                        const code = c.charCodeAt(0);
+                        if (code > 127 || '<>&"\''.includes(c)) {
+                            return `&#${code};`;
+                        }
+                        return c;
+                    }).join('');
+                    logMessage = `<span class="cmd">$ htmlencode</span> --entities`;
+                    break;
+                case 'unicode':
+                    result = input.split('').map(c => {
+                        const hex = c.charCodeAt(0).toString(16).padStart(4, '0');
+                        return `\\u${hex}`;
+                    }).join('');
+                    logMessage = `<span class="cmd">$ unicode</span> --escape`;
+                    break;
+                case 'double':
+                    result = encodeURIComponent(encodeURIComponent(input));
+                    logMessage = `<span class="cmd">$ urlencode</span> --double`;
+                    break;
+            }
+
+            output.value = result;
+            log.innerHTML = logMessage + `<br><span class="success">[OK]</span> 編碼完成，長度: ${result.length}`;
+            log.style.display = 'block';
+        }
+
+        function decodePayload() {
+            const input = document.getElementById('encoder-output').value;
+            const output = document.getElementById('encoder-input');
+            const log = document.getElementById('encoder-log');
+
+            if (!input) return;
+
+            let result = '';
+            let logMessage = '';
+
+            switch (currentEncodeType) {
+                case 'url':
+                    try {
+                        result = decodeURIComponent(input);
+                        logMessage = `<span class="cmd">$ urldecode</span>`;
+                    } catch (e) {
+                        result = '[ERROR] 無法解碼';
+                        logMessage = `<span class="error">[ERROR]</span> URL 解碼失敗`;
+                    }
+                    break;
+                case 'base64':
+                    try {
+                        result = decodeURIComponent(escape(atob(input)));
+                        logMessage = `<span class="cmd">$ base64</span> -d`;
+                    } catch (e) {
+                        result = '[ERROR] 無法解碼';
+                        logMessage = `<span class="error">[ERROR]</span> Base64 解碼失敗`;
+                    }
+                    break;
+                case 'html':
+                    const textarea = document.createElement('textarea');
+                    textarea.innerHTML = input;
+                    result = textarea.value;
+                    logMessage = `<span class="cmd">$ htmldecode</span>`;
+                    break;
+                case 'unicode':
+                    try {
+                        result = input.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) =>
+                            String.fromCharCode(parseInt(hex, 16))
+                        );
+                        logMessage = `<span class="cmd">$ unicode</span> --unescape`;
+                    } catch (e) {
+                        result = '[ERROR] 無法解碼';
+                    }
+                    break;
+                case 'double':
+                    try {
+                        result = decodeURIComponent(decodeURIComponent(input));
+                        logMessage = `<span class="cmd">$ urldecode</span> --double`;
+                    } catch (e) {
+                        result = '[ERROR] 無法解碼';
+                        logMessage = `<span class="error">[ERROR]</span> 雙重解碼失敗`;
+                    }
+                    break;
+            }
+
+            output.value = result;
+            log.innerHTML = logMessage + `<br><span class="success">[OK]</span> 解碼完成`;
+            log.style.display = 'block';
+        }
+
+        function swapEncoder() {
+            const input = document.getElementById('encoder-input');
+            const output = document.getElementById('encoder-output');
+            const temp = input.value;
+            input.value = output.value;
+            output.value = temp;
+        }
+
+        function clearEncoder() {
+            document.getElementById('encoder-input').value = '';
+            document.getElementById('encoder-output').value = '';
+            document.getElementById('encoder-log').style.display = 'none';
+        }
+
+        function setEncoderInput(value) {
+            document.getElementById('encoder-input').value = value;
+            encodePayload();
+        }
+
+        // ========================================
+        // SCORE CALCULATOR
+        // ========================================
+        function toggleViolation(item) {
+            item.classList.toggle('checked');
+            updateScore();
+        }
+
+        function updateScore() {
+            let total = 0;
+            document.querySelectorAll('.violation-item.checked').forEach(item => {
+                total += parseInt(item.dataset.score);
+            });
+
+            const scoreNumber = document.getElementById('score-number');
+            const scoreStatus = document.getElementById('score-status');
+            const scoreDisplay = document.getElementById('score-display');
+
+            scoreNumber.textContent = total;
+            scoreDisplay.classList.remove('warning', 'blocked');
+
+            if (total >= 4) {
+                scoreStatus.innerHTML = '<span style="color: var(--danger);">[BLOCKED]</span> VIOL_RATING_THREAT 觸發';
+                scoreDisplay.classList.add('blocked');
+            } else if (total >= 3) {
+                scoreStatus.innerHTML = '<span style="color: var(--amber);">[WARNING]</span> 接近閾值';
+                scoreDisplay.classList.add('warning');
+            } else {
+                scoreStatus.innerHTML = '<span style="color: var(--phosphor);">[ALLOWED]</span> 請求放行';
+            }
+        }
+
+        function resetScoreCalculator() {
+            document.querySelectorAll('.violation-item.checked').forEach(item => {
+                item.classList.remove('checked');
+            });
+            updateScore();
+        }
+
+        function simulateApiClient() {
+            resetScoreCalculator();
+            // Simulate: BOT_CLIENT + HTTP_RESPONSE_STATUS (429) + ENCODING
+            const items = document.querySelectorAll('.violation-item');
+            items[0].classList.add('checked'); // BOT_CLIENT
+            items[2].classList.add('checked'); // HTTP_RESPONSE_STATUS
+            items[3].classList.add('checked'); // ENCODING
+            updateScore();
+        }
+
+        function simulateAttack() {
+            resetScoreCalculator();
+            // Simulate: ATTACK_SIGNATURE
+            const items = document.querySelectorAll('.violation-item');
+            items[6].classList.add('checked'); // ATTACK_SIGNATURE
+            updateScore();
+        }
+
+        // ========================================
+        // BYPASS CHALLENGE
+        // ========================================
+        const challenges = [
+            {
+                level: 1,
+                title: '大小寫繞過',
+                description: '這個 WAF 規則會阻擋包含 "script" 的請求。你的任務是讓 XSS payload 通過檢測。',
+                blocked: '<script>alert(1)</script>',
+                goal: '讓包含 script 標籤的 XSS payload 通過 WAF',
+                hint: 'WAF 規則可能是大小寫敏感的。試試改變字母的大小寫。',
+                rule: /script/i,
+                validate: (input) => {
+                    // Must contain script tag functionality but bypass case-sensitive check
+                    const hasScript = /<script/i.test(input) || /javascript:/i.test(input);
+                    const bypassesRule = !(/script/.test(input)); // Only lowercase blocked
+                    return hasScript && bypassesRule;
+                },
+                defense: '使用大小寫不敏感的正則表達式 (?i)，例如：<code>/(&lt;script|javascript:)/i</code>',
+                answers: ['<SCRIPT>alert(1)</SCRIPT>', '<ScRiPt>alert(1)</ScRiPt>', '<Script>alert(1)</Script>']
+            },
+            {
+                level: 2,
+                title: 'URL 編碼繞過',
+                description: 'WAF 阻擋了路徑穿越攻擊 "../"。但有些 WAF 不會解碼 URL 編碼後再檢查。',
+                blocked: '../../../etc/passwd',
+                goal: '使用 URL 編碼讓路徑穿越 payload 通過',
+                hint: '../ 的 URL 編碼是 %2e%2e%2f。試著編碼關鍵字元。',
+                rule: /\.\.\//,
+                validate: (input) => {
+                    // Must decode to path traversal but not contain literal ../
+                    try {
+                        const decoded = decodeURIComponent(input);
+                        return decoded.includes('../') && !input.includes('../');
+                    } catch {
+                        return false;
+                    }
+                },
+                defense: '在檢測前先進行 URL 解碼，並進行多層解碼以防止雙重編碼攻擊',
+                answers: ['%2e%2e%2f%2e%2e%2f%2e%2e%2fetc/passwd', '%2e%2e/', '..%2f']
+            },
+            {
+                level: 3,
+                title: 'SQL 註解繞過',
+                description: 'WAF 阻擋 "UNION SELECT"。攻擊者可以用 SQL 註解來分割關鍵字。',
+                blocked: 'UNION SELECT',
+                goal: '用 SQL 註解分割關鍵字，繞過空格匹配',
+                hint: 'SQL 支援 /**/ 作為註解。可以用它來取代空格。',
+                rule: /union\s+select/i,
+                validate: (input) => {
+                    // Must contain union and select but not with just whitespace
+                    const hasUnion = /union/i.test(input);
+                    const hasSelect = /select/i.test(input);
+                    const noDirectSpace = !/union\s+select/i.test(input);
+                    const hasComment = /\/\*.*\*\//.test(input);
+                    return hasUnion && hasSelect && noDirectSpace && hasComment;
+                },
+                defense: '移除 SQL 註解後再進行檢測：<code>input.replace(/\\/\\*.*?\\*\\//g, " ")</code>',
+                answers: ['UNION/**/SELECT', 'UNION/*foo*/SELECT', 'UN/**/ION/**/SEL/**/ECT']
+            },
+            {
+                level: 4,
+                title: 'HTML 標籤變形',
+                description: 'WAF 阻擋 <img 和 onerror。但 HTML 解析器對於標籤格式很寬容。',
+                blocked: '<img src=x onerror=alert(1)>',
+                goal: '使用 HTML 解析器的寬容特性繞過檢測',
+                hint: '試試在標籤名稱後加入特殊字元如 / 或換行。例如：<img/src=x>',
+                rule: /<img\s+.*onerror/i,
+                validate: (input) => {
+                    // Must be valid XSS but bypass the specific pattern
+                    const hasImg = /<img/i.test(input);
+                    const hasOnerror = /onerror/i.test(input);
+                    const bypassesRule = !/<img\s+.*onerror/i.test(input);
+                    return hasImg && hasOnerror && bypassesRule;
+                },
+                defense: '使用更嚴格的 HTML 解析或白名單方式，而非黑名單正則',
+                answers: ['<img/src=x onerror=alert(1)>', '<img\nsrc=x onerror=alert(1)>', '<img\tsrc=x onerror=alert(1)>']
+            },
+            {
+                level: 5,
+                title: '進階：多重技術組合',
+                description: 'WAF 同時檢測 SQL 關鍵字和特殊字元。你需要組合多種繞過技術。',
+                blocked: "' OR 1=1--",
+                goal: '組合編碼和變形技術，繞過多重檢測',
+                hint: '可以組合：大小寫變換、編碼、註解、空白字元變換等技術。',
+                rule: /('|or\s+\d+\s*=\s*\d+|--)/i,
+                validate: (input) => {
+                    // Complex validation - must achieve SQL injection effect without triggering rules
+                    const hasBypassAttempt = (
+                        /%27/i.test(input) || // encoded quote
+                        /%6f%72/i.test(input) || // encoded OR
+                        /\/\*/.test(input) || // SQL comment
+                        /\|\|/.test(input) // OR alternative
+                    );
+                    const notDirectMatch = !(/('|or\s+\d+\s*=\s*\d+|--)/i.test(input));
+                    return hasBypassAttempt && notDirectMatch;
+                },
+                defense: '多層解碼 + 正規化 + 語意分析，而非僅靠正則表達式匹配',
+                answers: ['%27%20OR%201=1%23', "' || 1=1/*", '%27%20%4f%52%201=1--']
+            }
+        ];
+
+        let currentChallenge = 0;
+        let completedChallenges = new Set();
+
+        // Challenge level buttons
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentChallenge = parseInt(this.dataset.level);
+                loadChallenge();
+            });
+        });
+
+        function loadChallenge() {
+            const challenge = challenges[currentChallenge];
+            document.getElementById('challenge-description').textContent = challenge.description;
+            document.getElementById('challenge-target').textContent = challenge.blocked;
+            document.getElementById('challenge-goal').textContent = challenge.goal;
+            document.getElementById('challenge-hint').textContent = challenge.hint;
+            document.getElementById('challenge-hint').classList.remove('show');
+            document.getElementById('challenge-input').value = '';
+            document.getElementById('challenge-result').classList.remove('show', 'success', 'fail');
+            document.getElementById('challenge-defense').textContent = '完成挑戰後，這裡會顯示如何防護這類繞過技術。';
+
+            // Update completed status on buttons
+            document.querySelectorAll('.level-btn').forEach((btn, index) => {
+                btn.classList.toggle('completed', completedChallenges.has(index));
+            });
+            document.getElementById('challenge-completed').textContent = completedChallenges.size;
+        }
+
+        function showHint() {
+            document.getElementById('challenge-hint').classList.toggle('show');
+        }
+
+        function submitChallenge() {
+            const input = document.getElementById('challenge-input').value;
+            const challenge = challenges[currentChallenge];
+            const result = document.getElementById('challenge-result');
+            const title = document.getElementById('challenge-result-title');
+            const message = document.getElementById('challenge-result-message');
+            const detail = document.getElementById('challenge-result-detail');
+
+            if (!input.trim()) {
+                result.classList.remove('success');
+                result.classList.add('show', 'fail');
+                title.textContent = '[ERROR] 請輸入 payload';
+                message.textContent = '輸入欄位不能為空';
+                detail.innerHTML = '';
+                return;
+            }
+
+            // Check if it still triggers the original rule
+            const triggersRule = challenge.rule.test(input);
+            // Check if it's a valid bypass
+            const isValidBypass = challenge.validate(input);
+
+            result.classList.remove('success', 'fail');
+            result.classList.add('show');
+
+            if (isValidBypass) {
+                result.classList.add('success');
+                title.textContent = '[SUCCESS] 繞過成功！';
+                message.textContent = `你的 payload 成功繞過了 WAF 規則`;
+                detail.innerHTML = `
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; margin-top: 0.5rem;">
+                        <span style="color: var(--text-dim);">input:</span> <span style="color: var(--phosphor);">${escapeHtml(input)}</span><br>
+                        <span style="color: var(--text-dim);">rule_match:</span> <span style="color: var(--phosphor);">false</span><br>
+                        <span style="color: var(--text-dim);">bypass:</span> <span style="color: var(--phosphor);">true</span>
+                    </div>
+                `;
+
+                // Mark as completed
+                completedChallenges.add(currentChallenge);
+                document.querySelectorAll('.level-btn')[currentChallenge].classList.add('completed');
+                document.getElementById('challenge-completed').textContent = completedChallenges.size;
+
+                // Show defense recommendation
+                document.getElementById('challenge-defense').innerHTML = challenge.defense;
+
+                // Auto advance after success
+                if (currentChallenge < challenges.length - 1) {
+                    detail.innerHTML += `
+                        <button class="btn btn-secondary" style="margin-top: 1rem;" onclick="nextChallenge()">
+                            下一關 →
+                        </button>
+                    `;
+                } else if (completedChallenges.size === challenges.length) {
+                    detail.innerHTML += `
+                        <div style="margin-top: 1rem; padding: 1rem; background: var(--phosphor-glow); border: 1px solid var(--phosphor);">
+                            <strong style="color: var(--phosphor);">🎉 恭喜完成所有挑戰！</strong><br>
+                            <span style="color: var(--text-secondary); font-size: 0.875rem;">你已經掌握了常見的 WAF 繞過技術。記住，這些知識是為了更好地防護系統！</span>
+                        </div>
+                    `;
+                }
+            } else if (triggersRule) {
+                result.classList.add('fail');
+                title.textContent = '[BLOCKED] WAF 攔截';
+                message.textContent = '你的 payload 觸發了 WAF 規則';
+                detail.innerHTML = `
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; margin-top: 0.5rem;">
+                        <span style="color: var(--text-dim);">input:</span> <span style="color: var(--danger);">${escapeHtml(input)}</span><br>
+                        <span style="color: var(--text-dim);">rule_match:</span> <span style="color: var(--danger);">true</span><br>
+                        <span style="color: var(--text-dim);">hint:</span> 試著改變 payload 的形式來繞過規則
+                    </div>
+                `;
+            } else {
+                result.classList.add('fail');
+                title.textContent = '[INVALID] payload 無效';
+                message.textContent = '雖然繞過了規則，但這個 payload 可能無法達成攻擊效果';
+                detail.innerHTML = `
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; margin-top: 0.5rem;">
+                        <span style="color: var(--text-dim);">input:</span> <span style="color: var(--amber);">${escapeHtml(input)}</span><br>
+                        <span style="color: var(--text-dim);">rule_match:</span> <span style="color: var(--phosphor);">false</span><br>
+                        <span style="color: var(--text-dim);">effective:</span> <span style="color: var(--danger);">false</span><br>
+                        <span style="color: var(--text-dim);">hint:</span> payload 需要保持原本的攻擊功能
+                    </div>
+                `;
+            }
+        }
+
+        function nextChallenge() {
+            if (currentChallenge < challenges.length - 1) {
+                currentChallenge++;
+                document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.level-btn')[currentChallenge].classList.add('active');
+                loadChallenge();
+            }
+        }
+
+        function testInSimulator() {
+            const input = document.getElementById('challenge-input').value;
+            if (input) {
+                document.getElementById('waf-input').value = input;
+                checkWAF();
+                document.getElementById('rules').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Initialize challenge
+        loadChallenge();
+
+        // Allow Enter key to submit challenge
+        document.getElementById('challenge-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitChallenge();
+            }
         });
     </script>
 </body>
