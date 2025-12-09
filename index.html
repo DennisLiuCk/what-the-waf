@@ -2865,9 +2865,9 @@ data = {"html_base64": html_content}
                 <div style="margin-top: 1rem;">
                     <p style="color: var(--text-dim); font-size: 0.75rem;">快速範例：</p>
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                        <button class="btn btn-secondary" style="font-size: 0.6875rem;" onclick="setEncoderInput(`' OR '1'='1`)">SQLi 基本</button>
-                        <button class="btn btn-secondary" style="font-size: 0.6875rem;" onclick="setEncoderInput('<script>alert(1)</script>')">XSS</button>
-                        <button class="btn btn-secondary" style="font-size: 0.6875rem;" onclick="setEncoderInput('../../../etc/passwd')">Path Traversal</button>
+                        <button class="btn btn-secondary" style="font-size: 0.6875rem;" data-encoder-sample="' OR '1'='1">SQLi 基本</button>
+                        <button class="btn btn-secondary" style="font-size: 0.6875rem;" data-encoder-sample="&lt;script&gt;alert(1)&lt;/script&gt;">XSS</button>
+                        <button class="btn btn-secondary" style="font-size: 0.6875rem;" data-encoder-sample="../../../etc/passwd">Path Traversal</button>
                     </div>
                 </div>
 
@@ -3552,6 +3552,17 @@ data = {"html_base64": html_content}
             encodePayload();
         }
 
+        // Encoder sample buttons
+        document.querySelectorAll('[data-encoder-sample]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const sample = this.dataset.encoderSample;
+                // Decode HTML entities
+                const textarea = document.createElement('textarea');
+                textarea.innerHTML = sample;
+                setEncoderInput(textarea.value);
+            });
+        });
+
         // ========================================
         // SCORE CALCULATOR
         // ========================================
@@ -3617,18 +3628,19 @@ data = {"html_base64": html_content}
                 level: 1,
                 title: '大小寫繞過',
                 description: '這個 WAF 規則會阻擋包含 "script" 的請求。你的任務是讓 XSS payload 通過檢測。',
-                blocked: '<script>alert(1)</script>',
+                blocked: '<scr' + 'ipt>alert(1)<\/scr' + 'ipt>',
                 goal: '讓包含 script 標籤的 XSS payload 通過 WAF',
                 hint: 'WAF 規則可能是大小寫敏感的。試試改變字母的大小寫。',
-                rule: /script/i,
+                rule: /script/,
                 validate: (input) => {
                     // Must contain script tag functionality but bypass case-sensitive check
-                    const hasScript = /<script/i.test(input) || /javascript:/i.test(input);
+                    const lowerInput = input.toLowerCase();
+                    const hasScript = lowerInput.includes('<script') || lowerInput.includes('javascript:');
                     const bypassesRule = !(/script/.test(input)); // Only lowercase blocked
                     return hasScript && bypassesRule;
                 },
-                defense: '使用大小寫不敏感的正則表達式 (?i)，例如：<code>/(&lt;script|javascript:)/i</code>',
-                answers: ['<SCRIPT>alert(1)</SCRIPT>', '<ScRiPt>alert(1)</ScRiPt>', '<Script>alert(1)</Script>']
+                defense: '使用大小寫不敏感的正則表達式 (?i)，例如：<code>/(&lt;script|javascript:)/i<\/code>',
+                answers: ['<SCRIPT>alert(1)<\/SCRIPT>', '<ScRiPt>alert(1)<\/ScRiPt>', '<Script>alert(1)<\/Script>']
             },
             {
                 level: 2,
@@ -3666,7 +3678,7 @@ data = {"html_base64": html_content}
                     const hasComment = /\/\*.*\*\//.test(input);
                     return hasUnion && hasSelect && noDirectSpace && hasComment;
                 },
-                defense: '移除 SQL 註解後再進行檢測：<code>input.replace(/\\/\\*.*?\\*\\//g, " ")</code>',
+                defense: '移除 SQL 註解後再進行檢測：<code>input.replace(/\\/\\*.*?\\*\\//g, " ")<\/code>',
                 answers: ['UNION/**/SELECT', 'UNION/*foo*/SELECT', 'UN/**/ION/**/SEL/**/ECT']
             },
             {
@@ -3703,11 +3715,11 @@ data = {"html_base64": html_content}
                         /\/\*/.test(input) || // SQL comment
                         /\|\|/.test(input) // OR alternative
                     );
-                    const notDirectMatch = !(/('|or\s+\d+\s*=\s*\d+|--)/i.test(input));
+                    const notDirectMatch = !(/'|or\s+\d+\s*=\s*\d+|--/i.test(input));
                     return hasBypassAttempt && notDirectMatch;
                 },
                 defense: '多層解碼 + 正規化 + 語意分析，而非僅靠正則表達式匹配',
-                answers: ['%27%20OR%201=1%23', "' || 1=1/*", '%27%20%4f%52%201=1--']
+                answers: ['%27%20OR%201=1%23', '%27 || 1=1/*', '%27%20%4f%52%201=1--']
             }
         ];
 
