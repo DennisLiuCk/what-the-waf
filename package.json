@@ -1,0 +1,35 @@
+{
+  "name": "what-the-waf",
+  "version": "1.0.0",
+  "description": "一個互動式的 WAF (Web Application Firewall) 學習平台。",
+  "main": "index.html",
+  "scripts": {
+    "serve": "serve -l 3000 .",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:chromium": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "test:mobile": "playwright test --project='Mobile Chrome' --project='Mobile Safari'",
+    "test:report": "playwright show-report"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DennisLiuCk/what-the-waf"
+  },
+  "keywords": [
+    "waf",
+    "web-application-firewall",
+    "security",
+    "education",
+    "interactive"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "serve": "^14.2.5",
+    "typescript": "^5.9.3"
+  }
+}

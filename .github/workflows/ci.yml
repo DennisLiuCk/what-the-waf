@@ -1,0 +1,186 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+# Cancel in-progress runs for the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+
+jobs:
+  # Quick validation job
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check HTML validity
+        run: |
+          # Basic HTML structure check
+          if ! grep -q '<!DOCTYPE html>' index.html; then
+            echo "::error::Missing DOCTYPE declaration"
+            exit 1
+          fi
+          if ! grep -q '<html' index.html; then
+            echo "::error::Missing html tag"
+            exit 1
+          fi
+          echo "HTML structure looks valid"
+
+      - name: Check for required sections
+        run: |
+          sections=("id=\"intro\"" "id=\"attacks\"" "id=\"rules\"" "id=\"bypass\"" "id=\"challenge\"" "id=\"quiz\"")
+          for section in "${sections[@]}"; do
+            if ! grep -q "$section" index.html; then
+              echo "::error::Missing required section: $section"
+              exit 1
+            fi
+          done
+          echo "All required sections present"
+
+  # Main E2E test job
+  e2e-tests:
+    name: E2E Tests (${{ matrix.browser }})
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browser
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Run E2E tests
+        run: npx playwright test --project=${{ matrix.browser }}
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload test artifacts on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-artifacts-${{ matrix.browser }}
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+
+  # Mobile responsiveness tests
+  mobile-tests:
+    name: Mobile Tests
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Run mobile viewport tests
+        run: npx playwright test --project="Mobile Chrome" --project="Mobile Safari"
+
+      - name: Upload mobile test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-mobile
+          path: playwright-report/
+          retention-days: 14
+
+  # Final status check
+  status-check:
+    name: Status Check
+    needs: [validate, e2e-tests, mobile-tests]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Determine overall status
+        run: |
+          echo "Validate: ${{ needs.validate.result }}"
+          echo "E2E Tests: ${{ needs.e2e-tests.result }}"
+          echo "Mobile Tests: ${{ needs.mobile-tests.result }}"
+
+          if [[ "${{ needs.validate.result }}" == "failure" ]] || \
+             [[ "${{ needs.e2e-tests.result }}" == "failure" ]] || \
+             [[ "${{ needs.mobile-tests.result }}" == "failure" ]]; then
+            echo "::error::One or more jobs failed!"
+            exit 1
+          fi
+
+          echo "::notice::All tests passed successfully!"
+
+      - name: Create status comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const results = {
+              validate: '${{ needs.validate.result }}',
+              e2e: '${{ needs.e2e-tests.result }}',
+              mobile: '${{ needs.mobile-tests.result }}'
+            };
+
+            const allPassed = Object.values(results).every(r => r === 'success');
+            const emoji = allPassed ? '✅' : '❌';
+
+            const body = `## ${emoji} Test Results
+
+            | Job | Status |
+            |-----|--------|
+            | Validation | ${results.validate === 'success' ? '✅' : '❌'} ${results.validate} |
+            | E2E Tests (Chrome, Firefox, Safari) | ${results.e2e === 'success' ? '✅' : '❌'} ${results.e2e} |
+            | Mobile Tests | ${results.mobile === 'success' ? '✅' : '❌'} ${results.mobile} |
+
+            ${allPassed ? '🎉 All tests passed! Ready for review.' : '⚠️ Some tests failed. Please check the logs.'}
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
