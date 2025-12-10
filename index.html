@@ -1048,6 +1048,26 @@
             text-decoration: underline;
         }
 
+        /* Resource Links */
+        #resources a {
+            color: var(--phosphor);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            display: inline-block;
+        }
+
+        #resources a:hover {
+            color: #fff;
+            text-decoration: underline;
+            text-shadow: 0 0 10px var(--phosphor-glow);
+        }
+
+        #resources a:active {
+            color: var(--phosphor-dim);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .nav-links {
@@ -3072,10 +3092,10 @@ data = {"html_base64": html_content}
             <div class="card">
                 <h3><span class="icon">[REF]</span> 推薦學習資源</h3>
                 <ul style="color: var(--text-secondary); margin-top: 1rem; padding-left: 1.5rem; list-style: none;">
-                    <li style="margin-bottom: 0.75rem;"><span style="color: var(--text-dim); margin-right: 0.5rem;">-></span><a href="https://owasp.org/www-project-web-security-testing-guide/" target="_blank" style="color: var(--phosphor);">OWASP Web Security Testing Guide</a></li>
-                    <li style="margin-bottom: 0.75rem;"><span style="color: var(--text-dim); margin-right: 0.5rem;">-></span><a href="https://owasp.org/www-project-modsecurity-core-rule-set/" target="_blank" style="color: var(--phosphor);">OWASP ModSecurity Core Rule Set</a></li>
-                    <li style="margin-bottom: 0.75rem;"><span style="color: var(--text-dim); margin-right: 0.5rem;">-></span><a href="https://portswigger.net/web-security" target="_blank" style="color: var(--phosphor);">PortSwigger Web Security Academy</a></li>
-                    <li style="margin-bottom: 0.75rem;"><span style="color: var(--text-dim); margin-right: 0.5rem;">-></span><a href="https://github.com/payloadbox" target="_blank" style="color: var(--phosphor);">PayloadBox - Payload 收集</a></li>
+                    <li style="margin-bottom: 0.75rem;"><span style="color: var(--text-dim); margin-right: 0.5rem;">-></span><a href="https://owasp.org/www-project-web-security-testing-guide/" target="_blank" rel="noopener noreferrer">OWASP Web Security Testing Guide</a></li>
+                    <li style="margin-bottom: 0.75rem;"><span style="color: var(--text-dim); margin-right: 0.5rem;">-></span><a href="https://owasp.org/www-project-modsecurity-core-rule-set/" target="_blank" rel="noopener noreferrer">OWASP ModSecurity Core Rule Set</a></li>
+                    <li style="margin-bottom: 0.75rem;"><span style="color: var(--text-dim); margin-right: 0.5rem;">-></span><a href="https://portswigger.net/web-security" target="_blank" rel="noopener noreferrer">PortSwigger Web Security Academy</a></li>
+                    <li style="margin-bottom: 0.75rem;"><span style="color: var(--text-dim); margin-right: 0.5rem;">-></span><a href="https://github.com/payloadbox" target="_blank" rel="noopener noreferrer">PayloadBox - Payload 收集</a></li>
                 </ul>
             </div>
         </section>
