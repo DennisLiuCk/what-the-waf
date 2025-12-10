@@ -20,7 +20,7 @@ test.describe('Page Load and Basic Structure', () => {
     await expect(heroSection).toBeVisible();
 
     // Check for ASCII art title
-    const asciiArt = page.locator('.ascii-title');
+    const asciiArt = page.locator('.hero-ascii');
     await expect(asciiArt).toBeVisible();
   });
 
@@ -30,15 +30,13 @@ test.describe('Page Load and Basic Structure', () => {
 
     // Check all navigation links exist
     const navLinks = [
-      { text: '簡介', href: '#intro' },
-      { text: '攻擊類型', href: '#attacks' },
-      { text: 'WAF 規則', href: '#rules' },
-      { text: '繞過技巧', href: '#bypass' },
-      { text: '日誌分析', href: '#log-analysis' },
-      { text: '評分機制', href: '#viol-rating' },
-      { text: '工具箱', href: '#tools' },
-      { text: '挑戰', href: '#challenge' },
-      { text: '測驗', href: '#quiz' },
+      { text: 'intro', href: '#intro' },
+      { text: 'attacks', href: '#attacks' },
+      { text: 'rules', href: '#rules' },
+      { text: 'bypass', href: '#bypass' },
+      { text: 'tools', href: '#tools' },
+      { text: 'challenge', href: '#challenge' },
+      { text: 'quiz', href: '#quiz' },
     ];
 
     for (const link of navLinks) {
@@ -48,7 +46,7 @@ test.describe('Page Load and Basic Structure', () => {
   });
 
   test('should have all main sections', async ({ page }) => {
-    const sections = ['#intro', '#attacks', '#rules', '#bypass', '#log-analysis', '#viol-rating', '#tools', '#challenge', '#quiz'];
+    const sections = ['#intro', '#attacks', '#rules', '#bypass', '#tools', '#challenge', '#quiz'];
 
     for (const sectionId of sections) {
       const section = page.locator(sectionId);

@@ -22,12 +22,12 @@ test.describe('Encoder Tool Interface', () => {
     const output = page.locator('#encoder-output');
     await expect(output).toBeVisible();
 
-    // Check for encode button
-    const encodeBtn = page.locator('button:has-text("編碼")');
+    // Check for encode button (use btn-primary to avoid matching "雙重編碼" type button)
+    const encodeBtn = page.locator('button.btn-primary:has-text("編碼")');
     await expect(encodeBtn).toBeVisible();
 
     // Check for decode button
-    const decodeBtn = page.locator('button:has-text("解碼")');
+    const decodeBtn = page.locator('button.btn-secondary:has-text("解碼")');
     await expect(decodeBtn).toBeVisible();
   });
 
@@ -64,7 +64,7 @@ test.describe('URL Encoding', () => {
   test('should encode special characters', async ({ page }) => {
     const input = page.locator('#encoder-input');
     const output = page.locator('#encoder-output');
-    const encodeBtn = page.locator('button:has-text("編碼")');
+    const encodeBtn = page.locator('button.btn-primary:has-text("編碼")');
 
     await input.fill("' OR '1'='1");
     await encodeBtn.click();
@@ -78,7 +78,7 @@ test.describe('URL Encoding', () => {
   test('should encode path traversal', async ({ page }) => {
     const input = page.locator('#encoder-input');
     const output = page.locator('#encoder-output');
-    const encodeBtn = page.locator('button:has-text("編碼")');
+    const encodeBtn = page.locator('button.btn-primary:has-text("編碼")');
 
     await input.fill('../../../etc/passwd');
     await encodeBtn.click();
@@ -117,7 +117,7 @@ test.describe('Base64 Encoding', () => {
   test('should encode to Base64', async ({ page }) => {
     const input = page.locator('#encoder-input');
     const output = page.locator('#encoder-output');
-    const encodeBtn = page.locator('button:has-text("編碼")');
+    const encodeBtn = page.locator('button.btn-primary:has-text("編碼")');
 
     await input.fill('Hello World');
     await encodeBtn.click();
@@ -145,7 +145,7 @@ test.describe('Base64 Encoding', () => {
   test('should handle Base64 with special characters', async ({ page }) => {
     const input = page.locator('#encoder-input');
     const output = page.locator('#encoder-output');
-    const encodeBtn = page.locator('button:has-text("編碼")');
+    const encodeBtn = page.locator('button.btn-primary:has-text("編碼")');
 
     await input.fill('<script>alert(1)</script>');
     await encodeBtn.click();
@@ -168,7 +168,7 @@ test.describe('HTML Entity Encoding', () => {
   test('should encode HTML special characters', async ({ page }) => {
     const input = page.locator('#encoder-input');
     const output = page.locator('#encoder-output');
-    const encodeBtn = page.locator('button:has-text("編碼")');
+    const encodeBtn = page.locator('button.btn-primary:has-text("編碼")');
 
     await input.fill('<script>alert(1)</script>');
     await encodeBtn.click();
@@ -206,7 +206,7 @@ test.describe('Unicode Encoding', () => {
   test('should encode to Unicode escape', async ({ page }) => {
     const input = page.locator('#encoder-input');
     const output = page.locator('#encoder-output');
-    const encodeBtn = page.locator('button:has-text("編碼")');
+    const encodeBtn = page.locator('button.btn-primary:has-text("編碼")');
 
     await input.fill('test');
     await encodeBtn.click();
@@ -244,7 +244,7 @@ test.describe('Double URL Encoding', () => {
   test('should double encode', async ({ page }) => {
     const input = page.locator('#encoder-input');
     const output = page.locator('#encoder-output');
-    const encodeBtn = page.locator('button:has-text("編碼")');
+    const encodeBtn = page.locator('button.btn-primary:has-text("編碼")');
 
     await input.fill('../');
     await encodeBtn.click();
@@ -317,7 +317,7 @@ test.describe('Encoder Utility Functions', () => {
 
     // Enter text with URL encoding selected
     await input.fill('test input');
-    await page.locator('button:has-text("編碼")').click();
+    await page.locator('button.btn-primary:has-text("編碼")').click();
     await page.waitForTimeout(200);
 
     const urlResult = await output.inputValue();
@@ -350,7 +350,7 @@ test.describe('Encoder Error Handling', () => {
   });
 
   test('should handle empty input gracefully', async ({ page }) => {
-    const encodeBtn = page.locator('button:has-text("編碼")');
+    const encodeBtn = page.locator('button.btn-primary:has-text("編碼")');
     await encodeBtn.click();
     await page.waitForTimeout(200);
 

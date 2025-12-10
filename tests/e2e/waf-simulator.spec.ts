@@ -23,7 +23,7 @@ test.describe('WAF Simulator', () => {
     await expect(checkButton).toBeVisible();
 
     // Check for output area
-    const output = page.locator('#waf-output, .terminal-output');
+    const output = page.locator('#waf-result');
     await expect(output).toBeAttached();
   });
 
@@ -37,7 +37,7 @@ test.describe('WAF Simulator', () => {
     await page.waitForTimeout(200);
 
     // Should show blocked status
-    const output = page.locator('#waf-output, .terminal-output');
+    const output = page.locator('#waf-result');
     const outputText = await output.textContent();
     expect(outputText?.toLowerCase()).toMatch(/blocked|阻擋|匹配/i);
   });
@@ -50,7 +50,7 @@ test.describe('WAF Simulator', () => {
     await checkButton.click();
     await page.waitForTimeout(200);
 
-    const output = page.locator('#waf-output, .terminal-output');
+    const output = page.locator('#waf-result');
     const outputText = await output.textContent();
     expect(outputText?.toLowerCase()).toMatch(/blocked|阻擋|匹配|union/i);
   });
@@ -63,7 +63,7 @@ test.describe('WAF Simulator', () => {
     await checkButton.click();
     await page.waitForTimeout(200);
 
-    const output = page.locator('#waf-output, .terminal-output');
+    const output = page.locator('#waf-result');
     const outputText = await output.textContent();
     expect(outputText?.toLowerCase()).toMatch(/blocked|阻擋|匹配|xss|script/i);
   });
@@ -76,7 +76,7 @@ test.describe('WAF Simulator', () => {
     await checkButton.click();
     await page.waitForTimeout(200);
 
-    const output = page.locator('#waf-output, .terminal-output');
+    const output = page.locator('#waf-result');
     const outputText = await output.textContent();
     expect(outputText?.toLowerCase()).toMatch(/blocked|阻擋|匹配|command/i);
   });
@@ -89,7 +89,7 @@ test.describe('WAF Simulator', () => {
     await checkButton.click();
     await page.waitForTimeout(200);
 
-    const output = page.locator('#waf-output, .terminal-output');
+    const output = page.locator('#waf-result');
     const outputText = await output.textContent();
     expect(outputText?.toLowerCase()).toMatch(/blocked|阻擋|匹配|path|traversal/i);
   });
@@ -102,7 +102,7 @@ test.describe('WAF Simulator', () => {
     await checkButton.click();
     await page.waitForTimeout(200);
 
-    const output = page.locator('#waf-output, .terminal-output');
+    const output = page.locator('#waf-result');
     const outputText = await output.textContent();
     expect(outputText?.toLowerCase()).toMatch(/blocked|阻擋|匹配|ssrf|169\.254/i);
   });
@@ -115,7 +115,7 @@ test.describe('WAF Simulator', () => {
     await checkButton.click();
     await page.waitForTimeout(200);
 
-    const output = page.locator('#waf-output, .terminal-output');
+    const output = page.locator('#waf-result');
     const outputText = await output.textContent();
     // Should not show blocked status for benign input
     expect(outputText?.toLowerCase()).toMatch(/allowed|通過|沒有匹配|無匹配|0.*匹配/i);
@@ -130,7 +130,7 @@ test.describe('WAF Simulator', () => {
     await page.waitForTimeout(200);
 
     // Should not crash, output should still be present
-    const output = page.locator('#waf-output, .terminal-output');
+    const output = page.locator('#waf-result');
     await expect(output).toBeAttached();
   });
 

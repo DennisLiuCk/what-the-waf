@@ -47,8 +47,8 @@ test.describe('Quiz System', () => {
   });
 
   test('should display progress bar', async ({ page }) => {
-    const progressBar = page.locator('#quiz-progress, .progress-bar');
-    await expect(progressBar).toBeAttached();
+    const progressBar = page.locator('.progress-bar');
+    await expect(progressBar).toBeVisible();
   });
 
   test('should display score counter', async ({ page }) => {
