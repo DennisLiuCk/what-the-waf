@@ -251,7 +251,9 @@ test.describe('Challenge Level 5 - Advanced Multi-technique', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/#challenge');
     await page.waitForTimeout(300);
-    await page.locator('.level-btn[data-level="4"]').click();
+    // Use force click to avoid element interception issues on mobile viewports
+    // where nav/headers may overlap the level buttons
+    await page.locator('.level-btn[data-level="4"]').click({ force: true });
     await page.waitForTimeout(200);
   });
 
