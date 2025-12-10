@@ -31,7 +31,7 @@ test.describe('Challenge System', () => {
     await expect(input).toBeVisible();
 
     // Check for submit button
-    const submitButton = page.locator('button:has-text("提交"), button:has-text("Submit")');
+    const submitButton = page.locator('button:has-text("./exploit")');
     await expect(submitButton).toBeVisible();
   });
 
@@ -75,7 +75,7 @@ test.describe('Challenge System', () => {
   });
 
   test('should show hint when clicking hint button', async ({ page }) => {
-    const hintButton = page.locator('button:has-text("提示"), button:has-text("Hint")');
+    const hintButton = page.locator('button:has-text("提示")');
     const hint = page.locator('#challenge-hint');
 
     // Initially hint might be hidden
@@ -88,7 +88,7 @@ test.describe('Challenge System', () => {
 
   test('should show error for empty submission', async ({ page }) => {
     const input = page.locator('#challenge-input');
-    const submitButton = page.locator('button:has-text("提交"), button:has-text("Submit")');
+    const submitButton = page.locator('button:has-text("./exploit")');
 
     await input.fill('');
     await submitButton.click();
@@ -118,7 +118,7 @@ test.describe('Challenge Level 1 - Case Variation', () => {
 
   test('should accept valid case variation bypass', async ({ page }) => {
     const input = page.locator('#challenge-input');
-    const submitButton = page.locator('button:has-text("提交"), button:has-text("Submit")');
+    const submitButton = page.locator('button:has-text("./exploit")');
 
     // Use uppercase to bypass case-sensitive rule
     await input.fill('<SCRIPT>alert(1)</SCRIPT>');
@@ -134,7 +134,7 @@ test.describe('Challenge Level 1 - Case Variation', () => {
 
   test('should reject payload that triggers rule', async ({ page }) => {
     const input = page.locator('#challenge-input');
-    const submitButton = page.locator('button:has-text("提交"), button:has-text("Submit")');
+    const submitButton = page.locator('button:has-text("./exploit")');
 
     // Lowercase will be caught by the rule
     await input.fill('<script>alert(1)</script>');
@@ -159,7 +159,7 @@ test.describe('Challenge Level 2 - URL Encoding', () => {
 
   test('should accept URL encoded path traversal', async ({ page }) => {
     const input = page.locator('#challenge-input');
-    const submitButton = page.locator('button:has-text("提交"), button:has-text("Submit")');
+    const submitButton = page.locator('button:has-text("./exploit")');
 
     // URL encoded ../
     await input.fill('%2e%2e%2f%2e%2e%2f%2e%2e%2fetc/passwd');
@@ -174,7 +174,7 @@ test.describe('Challenge Level 2 - URL Encoding', () => {
 
   test('should reject literal path traversal', async ({ page }) => {
     const input = page.locator('#challenge-input');
-    const submitButton = page.locator('button:has-text("提交"), button:has-text("Submit")');
+    const submitButton = page.locator('button:has-text("./exploit")');
 
     await input.fill('../../../etc/passwd');
     await submitButton.click();
@@ -197,7 +197,7 @@ test.describe('Challenge Level 3 - SQL Comment Bypass', () => {
 
   test('should accept SQL comment bypass', async ({ page }) => {
     const input = page.locator('#challenge-input');
-    const submitButton = page.locator('button:has-text("提交"), button:has-text("Submit")');
+    const submitButton = page.locator('button:has-text("./exploit")');
 
     await input.fill('UNION/**/SELECT');
     await submitButton.click();
@@ -211,7 +211,7 @@ test.describe('Challenge Level 3 - SQL Comment Bypass', () => {
 
   test('should reject direct UNION SELECT', async ({ page }) => {
     const input = page.locator('#challenge-input');
-    const submitButton = page.locator('button:has-text("提交"), button:has-text("Submit")');
+    const submitButton = page.locator('button:has-text("./exploit")');
 
     await input.fill('UNION SELECT');
     await submitButton.click();
@@ -234,7 +234,7 @@ test.describe('Challenge Level 4 - HTML Tag Manipulation', () => {
 
   test('should accept HTML tag with slash', async ({ page }) => {
     const input = page.locator('#challenge-input');
-    const submitButton = page.locator('button:has-text("提交"), button:has-text("Submit")');
+    const submitButton = page.locator('button:has-text("./exploit")');
 
     await input.fill('<img/src=x onerror=alert(1)>');
     await submitButton.click();
@@ -257,7 +257,7 @@ test.describe('Challenge Level 5 - Advanced Multi-technique', () => {
 
   test('should accept encoded SQL injection bypass', async ({ page }) => {
     const input = page.locator('#challenge-input');
-    const submitButton = page.locator('button:has-text("提交"), button:has-text("Submit")');
+    const submitButton = page.locator('button:has-text("./exploit")');
 
     await input.fill('%27%20OR%201=1%23');
     await submitButton.click();
@@ -271,7 +271,7 @@ test.describe('Challenge Level 5 - Advanced Multi-technique', () => {
 
   test('should reject direct SQL injection', async ({ page }) => {
     const input = page.locator('#challenge-input');
-    const submitButton = page.locator('button:has-text("提交"), button:has-text("Submit")');
+    const submitButton = page.locator('button:has-text("./exploit")');
 
     await input.fill("' OR 1=1--");
     await submitButton.click();
@@ -295,7 +295,7 @@ test.describe('Challenge Defense Recommendations', () => {
 
     const input = page.locator('#challenge-input');
     await input.fill('<SCRIPT>alert(1)</SCRIPT>');
-    await page.locator('button:has-text("提交"), button:has-text("Submit")').click();
+    await page.locator('button:has-text("./exploit")').click();
     await page.waitForTimeout(300);
 
     // Defense section should be updated
