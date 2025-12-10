@@ -15,20 +15,32 @@ test.describe('Page Load and Basic Structure', () => {
     await expect(page).toHaveTitle(/What The WAF/i);
   });
 
-  test('should display the hero section with ASCII art', async ({ page }) => {
+  test('should display the hero section with ASCII art', async ({ page }, testInfo) => {
     const heroSection = page.locator('.hero');
     await expect(heroSection).toBeVisible();
 
-    // Check for ASCII art title
-    const asciiArt = page.locator('.hero-ascii');
-    await expect(asciiArt).toBeVisible();
+    // ASCII art is hidden on mobile viewports (responsive design)
+    const isMobile = testInfo.project.name.includes('Mobile');
+    if (!isMobile) {
+      const asciiArt = page.locator('.hero-ascii');
+      await expect(asciiArt).toBeVisible();
+    }
   });
 
-  test('should display navigation bar with all links', async ({ page }) => {
+  test('should display navigation bar with all links', async ({ page }, testInfo) => {
     const nav = page.locator('nav');
     await expect(nav).toBeVisible();
 
-    // Check all navigation links exist
+    // Nav links are hidden on mobile viewports (responsive design - display: none)
+    const isMobile = testInfo.project.name.includes('Mobile');
+    if (isMobile) {
+      // On mobile, just verify the nav exists and links are in the DOM
+      const navLinks = nav.locator('a');
+      await expect(navLinks.first()).toBeAttached();
+      return;
+    }
+
+    // Check all navigation links exist and are visible on desktop
     const navLinks = [
       { text: 'intro', href: '#intro' },
       { text: 'attacks', href: '#attacks' },
@@ -60,7 +72,14 @@ test.describe('Navigation Functionality', () => {
     await page.goto('/');
   });
 
-  test('should scroll to section when clicking nav links', async ({ page }) => {
+  test('should scroll to section when clicking nav links', async ({ page }, testInfo) => {
+    // Nav links are hidden on mobile viewports - skip this test for mobile
+    const isMobile = testInfo.project.name.includes('Mobile');
+    if (isMobile) {
+      test.skip();
+      return;
+    }
+
     // Click on "攻擊類型" link
     await page.click('nav a[href="#attacks"]');
 
