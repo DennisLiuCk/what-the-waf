@@ -71,8 +71,9 @@ test.describe('URL Encoding', () => {
     await page.waitForTimeout(200);
 
     const result = await output.inputValue();
-    expect(result).toContain('%27'); // Encoded quote
+    // Note: encodeURIComponent doesn't encode single quotes (') per RFC 3986
     expect(result).toContain('%20'); // Encoded space
+    expect(result).toContain('%3D'); // Encoded equals sign
   });
 
   test('should encode path traversal', async ({ page }) => {
@@ -86,7 +87,9 @@ test.describe('URL Encoding', () => {
 
     const result = await output.inputValue();
     expect(result).toContain('%2F'); // Encoded /
-    expect(result).toContain('%2E'); // Encoded .
+    // Note: encodeURIComponent doesn't encode dots (.) per RFC 3986
+    // The result will be: ..%2F..%2F..%2Fetc%2Fpasswd
+    expect(result).toContain('..'); // Dots remain unencoded
   });
 
   test('should decode URL encoded string', async ({ page }) => {
