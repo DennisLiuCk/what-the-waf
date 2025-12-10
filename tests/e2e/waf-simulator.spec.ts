@@ -135,20 +135,22 @@ test.describe('WAF Simulator', () => {
   });
 
   test('should work with quick test buttons', async ({ page }) => {
-    // Find quick test buttons
-    const quickButtons = page.locator('[data-payload], button:has-text("SQLi"), button:has-text("XSS")');
+    // Find quick test buttons with data-payload attribute
+    const quickButtons = page.locator('button[data-payload]');
+    await expect(quickButtons.first()).toBeVisible();
+
     const count = await quickButtons.count();
+    expect(count).toBeGreaterThan(0);
 
-    if (count > 0) {
-      // Click first quick test button
-      await quickButtons.first().click();
-      await page.waitForTimeout(300);
+    // Click first quick test button and wait for input to be filled
+    const input = page.locator('#waf-input');
+    await quickButtons.first().click();
 
-      // Input should be populated
-      const input = page.locator('#waf-input');
-      const value = await input.inputValue();
-      expect(value.length).toBeGreaterThan(0);
-    }
+    // Wait for the input to have a value (the click handler sets it)
+    await expect(input).not.toHaveValue('', { timeout: 2000 });
+
+    const value = await input.inputValue();
+    expect(value.length).toBeGreaterThan(0);
   });
 });
 
