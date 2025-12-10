@@ -94,8 +94,10 @@ test.describe('URL Encoding', () => {
     const output = page.locator('#encoder-output');
     const decodeBtn = page.locator('button:has-text("解碼")');
 
-    // Put encoded string in output and decode to input
-    await page.locator('#encoder-output').fill('%27%20OR%20%271%27%3D%271');
+    // Output is readonly, so use JavaScript to set its value
+    await page.evaluate(() => {
+      (document.getElementById('encoder-output') as HTMLTextAreaElement).value = '%27%20OR%20%271%27%3D%271';
+    });
     await decodeBtn.click();
     await page.waitForTimeout(200);
 
@@ -127,10 +129,12 @@ test.describe('Base64 Encoding', () => {
 
   test('should decode Base64', async ({ page }) => {
     const input = page.locator('#encoder-input');
-    const output = page.locator('#encoder-output');
     const decodeBtn = page.locator('button:has-text("解碼")');
 
-    await output.fill('SGVsbG8gV29ybGQ=');
+    // Output is readonly, so use JavaScript to set its value
+    await page.evaluate(() => {
+      (document.getElementById('encoder-output') as HTMLTextAreaElement).value = 'SGVsbG8gV29ybGQ=';
+    });
     await decodeBtn.click();
     await page.waitForTimeout(200);
 
@@ -177,10 +181,12 @@ test.describe('HTML Entity Encoding', () => {
 
   test('should decode HTML entities', async ({ page }) => {
     const input = page.locator('#encoder-input');
-    const output = page.locator('#encoder-output');
     const decodeBtn = page.locator('button:has-text("解碼")');
 
-    await output.fill('&#60;script&#62;alert(1)&#60;/script&#62;');
+    // Output is readonly, so use JavaScript to set its value
+    await page.evaluate(() => {
+      (document.getElementById('encoder-output') as HTMLTextAreaElement).value = '&#60;script&#62;alert(1)&#60;/script&#62;';
+    });
     await decodeBtn.click();
     await page.waitForTimeout(200);
 
@@ -213,10 +219,12 @@ test.describe('Unicode Encoding', () => {
 
   test('should decode Unicode escape', async ({ page }) => {
     const input = page.locator('#encoder-input');
-    const output = page.locator('#encoder-output');
     const decodeBtn = page.locator('button:has-text("解碼")');
 
-    await output.fill('\\u0074\\u0065\\u0073\\u0074');
+    // Output is readonly, so use JavaScript to set its value
+    await page.evaluate(() => {
+      (document.getElementById('encoder-output') as HTMLTextAreaElement).value = '\\u0074\\u0065\\u0073\\u0074';
+    });
     await decodeBtn.click();
     await page.waitForTimeout(200);
 
@@ -249,10 +257,12 @@ test.describe('Double URL Encoding', () => {
 
   test('should double decode', async ({ page }) => {
     const input = page.locator('#encoder-input');
-    const output = page.locator('#encoder-output');
     const decodeBtn = page.locator('button:has-text("解碼")');
 
-    await output.fill('%252E%252E%252F');
+    // Output is readonly, so use JavaScript to set its value
+    await page.evaluate(() => {
+      (document.getElementById('encoder-output') as HTMLTextAreaElement).value = '%252E%252E%252F';
+    });
     await decodeBtn.click();
     await page.waitForTimeout(200);
 
@@ -273,7 +283,10 @@ test.describe('Encoder Utility Functions', () => {
     const swapBtn = page.locator('button:has-text("交換"), button:has-text("⇄")');
 
     await input.fill('input text');
-    await output.fill('output text');
+    // Output is readonly, so use JavaScript to set its value
+    await page.evaluate(() => {
+      (document.getElementById('encoder-output') as HTMLTextAreaElement).value = 'output text';
+    });
     await swapBtn.click();
     await page.waitForTimeout(200);
 
@@ -287,7 +300,10 @@ test.describe('Encoder Utility Functions', () => {
     const clearBtn = page.locator('button:has-text("清除")');
 
     await input.fill('some text');
-    await output.fill('some output');
+    // Output is readonly, so use JavaScript to set its value
+    await page.evaluate(() => {
+      (document.getElementById('encoder-output') as HTMLTextAreaElement).value = 'some output';
+    });
     await clearBtn.click();
     await page.waitForTimeout(200);
 
@@ -348,10 +364,12 @@ test.describe('Encoder Error Handling', () => {
     await page.locator('.encoder-type-btn:has-text("Base64")').click();
     await page.waitForTimeout(100);
 
-    const output = page.locator('#encoder-output');
     const decodeBtn = page.locator('button:has-text("解碼")');
 
-    await output.fill('not-valid-base64!!!');
+    // Output is readonly, so use JavaScript to set its value
+    await page.evaluate(() => {
+      (document.getElementById('encoder-output') as HTMLTextAreaElement).value = 'not-valid-base64!!!';
+    });
     await decodeBtn.click();
     await page.waitForTimeout(200);
 
