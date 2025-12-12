@@ -251,16 +251,26 @@ test.describe('Challenge Level 5 - Advanced Multi-technique', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/#challenge');
     await page.waitForTimeout(300);
-    // Use force click to avoid element interception issues on mobile viewports
-    // where nav/headers may overlap the level buttons
-    await page.locator('.level-btn[data-level="4"]').click({ force: true });
+
+    // On mobile viewports, scroll the level buttons into view first
+    const level5Button = page.locator('.level-btn[data-level="4"]');
+    await level5Button.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(100);
+
+    // Click with force to avoid interception issues on mobile
+    await level5Button.click({ force: true });
     await page.waitForTimeout(200);
+
+    // Verify we're on Level 5 by checking button is active
+    await expect(level5Button).toHaveClass(/active/);
   });
 
   test('should accept encoded SQL injection bypass', async ({ page }) => {
     const input = page.locator('#challenge-input');
     const submitButton = page.locator('button:has-text("./exploit")');
 
+    // Scroll input into view on mobile
+    await input.scrollIntoViewIfNeeded();
     await input.fill('%27%20OR%201=1%23');
     await submitButton.click();
     await page.waitForTimeout(300);
@@ -275,6 +285,7 @@ test.describe('Challenge Level 5 - Advanced Multi-technique', () => {
     const input = page.locator('#challenge-input');
     const submitButton = page.locator('button:has-text("./exploit")');
 
+    await input.scrollIntoViewIfNeeded();
     await input.fill("' OR 1=1--");
     await submitButton.click();
     await page.waitForTimeout(300);
