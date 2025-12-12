@@ -120,7 +120,21 @@ concurrency:
 - 相同分支的新推送會自動取消正在進行的舊測試
 - 節省 CI 資源，避免測試結果過時
 
-### 3. 環境變數
+### 3. 權限設定 (Permissions)
+
+```yaml
+permissions:
+  contents: read
+  pull-requests: write
+```
+
+**學習重點：**
+- GitHub Actions 預設權限有限，需要明確聲明所需權限
+- `contents: read` - 允許讀取倉庫內容
+- `pull-requests: write` - 允許在 PR 上留言（用於自動測試報告）
+- 這是最小權限原則的實踐，只授予必要的權限
+
+### 4. 環境變數
 
 ```yaml
 env:
